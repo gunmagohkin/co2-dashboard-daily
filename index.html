@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EP-220 Toggle Oil Monitoring</title>
+  <!-- Note: For production, install Tailwind CSS as PostCSS plugin instead of using CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
+</head>
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<nav class="bg-white shadow">
+  <div class="max-w-full mx-auto px-4">
+    <div class="flex justify-between items-center h-14">
+
+      <!-- Logo + Title -->
+      <div class="flex items-center space-x-3">
+        <!-- Logo -->
+        <a href="index.html">
+          <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 w-auto">
+        </a>
+        <!-- Title -->
+        <div class="text-lg font-bold">Daily Monitoring Dashboard</div>
+      </div>
+
+      <!-- Desktop menu -->
+      <div class="hidden lg:flex space-x-6">
+        <!-- Oil Usage Dropdown -->
+        <div class="relative group">
+          <a href="#" class="hover:text-blue-500 font-semibold flex items-center">
+            Oil Usage in Operation
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </a>
+          <!-- Dropdown menu -->
+          <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div class="py-1">
+              <a href="tellus46.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 46</a>
+              <a href="tellus32.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 32</a>
+              <a href="index.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">EP-220</a>
+              <a href="PL-1000.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">PL-1000</a>
+              <a href="kerosene.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Kerosene</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other menu items -->
+        <a href="lpg.html" class="hover:text-blue-500 font-semibold">LPG Monitoring</a>
+      </div>
+
+      <!-- Mobile menu button -->
+      <div class="lg:hidden">
+        <button id="menu-btn" class="focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4">
+    <div class="mb-2">
+      <button id="mobile-oil-toggle" class="block py-1 hover:text-blue-500 font-semibold w-full text-left flex items-center justify-between">
+        Oil Usage in Operation
+        <svg id="mobile-arrow" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div id="mobile-oil-submenu" class="hidden ml-4 mt-1">
+        <a href="tellus46.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 46</a>
+        <a href="tellus36.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 32</a>
+        <a href="index.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">EP-220</a>
+        <a href="PL-1000.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">PL-1000</a>
+        <a href="kerosene.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Kerosene</a>
+      </div>
+    </div>
+
+    <!-- Other mobile menu items -->
+    <a href="lpg.html" class="block py-1 hover:text-blue-500">LPG Monitoring</a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="p-4">
+  <div class="max-w-full overflow-x-auto">
+    <div class="bg-white p-4 rounded shadow-md">
+      <div class="flex  flex-col sm:flex-row sm:items-center sm:justify-between">
+     <div class="flex items-center gap-2 mb-4">
+          <h1 id="category-title" class="text-lg font-bold">EP-220</h1>
+          <h1 class="text-lg font-bold">Toggle Oil Monitoring</h1>
+        </div>
+        <!-- Month/Year filters -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+          <div class="flex gap-2">
+            <select id="month-select" class="border rounded p-1">
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+
+            <select id="year-select" class="border rounded p-1">
+            
+            </select>
+          </div>
+        </div>
+      </div>
+    
+<!-- Info Section -->
+       <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-8 gap-2 mb-2">
+        <div>
+          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
+            <span>PAIL:</span><span>1</span>
+          </div>
+          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
+            <span>PAIL/Liter:</span><span>18</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCROLLABLE TABLE -->
+      <div class="overflow-x-auto">
+      <!-- SCROLLABLE TABLE -->
+<div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+  <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
+    <thead class="sticky top-0 bg-gradient-to-r from-blue-50 to-blue-100 z-10">
+      <tr>
+        <th class="px-3 py-2 border border-gray-200 font-semibold text-gray-700 text-xs tracking-wide">Items</th>
+        <!-- JS will fill these day columns dynamically -->
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Consumed (Liters)</td>
+      </tr>
+      <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Machine Run</td>
+      </tr>
+      <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Remaining Stock (Liters)</td>
+      </tr>
+      <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Delivery (Pail)</td>
+      </tr>
+      <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Refill (Pail)</td>
+      </tr>
+      <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Pail</td>
+      </tr>
+      <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Liters</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+      </div>
+      <!-- Bottom Info -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div class="border border-gray-400 p-4 rounded bg-white">
+          <h2 class="font-bold mb-2" id="initial-data-title"></h2>
+          <div>
+          <span><span class="font-semibold" id="avg-consumption-day-label"></span> <span class="font-bold" id="avg-consumption-day"></span> L</span><br>
+          <span><span class="font-semibold" id="monthly-consumption-label"></span> <span class="font-bold" id="monthly-consumption"></span> L</span>
+        </div>
+
+        </div>
+              <div class="border border-gray-400 p-4 rounded bg-white"> 
+                <b>Delivery Dates:</b><br>
+                <span id="delivery-date"></span>
+              </div>
+      </div>
+
+      <!-- CHART SECTION -->
+      <div class="mt-8">
+        <div class="bg-white p-6 rounded shadow-md">
+          <h2 class="text-lg font-bold mb-4">EP-220 Oil Consumption Analysis</h2>
+          
+          <!-- Chart Controls -->
+          <div class="flex flex-wrap gap-4 mb-6">
+            <!-- Chart View Toggle -->
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">View:</label>
+              <select id="chart-view" class="border rounded p-2 text-sm">
+                <option value="daily" selected>Daily Consumption</option>
+                <option value="machine">Consumption by Machine</option>
+              </select>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Chart Type:</label>
+              <select id="chart-type" class="border rounded p-2 text-sm">
+                <option value="line" selected>Line Chart</option>
+                <option value="bar">Bar Chart</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Show:</label>
+              <label class="flex items-center gap-1">
+                <input type="checkbox" id="show-consumption" checked>
+                <span class="text-sm">Total Consumption</span>
+              </label>
+            </div>
+            
+            <!-- Machine Summary Toggle Button -->
+            <div class="flex items-center gap-2">
+              <button id="toggle-machine-summary" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
+                Show Machine Summary
+              </button>
+            </div>
+          </div>
+
+          <!-- Daily Chart Container -->
+          <div id="daily-chart-container" class="relative mb-8">
+            <canvas id="oilChart" style="height:320px;max-height:320px;width:100%;"></canvas>
+          </div>
+
+          <!-- Machine Chart Container -->
+          <div id="machine-chart-container" class="relative mb-8" style="display: none;">
+            <canvas id="machineChart" style="height:320px;max-height:320px;width:100%;"></canvas>
+          </div>
+
+          <!-- Machine Summary Table Container -->
+          <div id="machine-summary-table" style="display: none;" class="mb-8">
+            <!-- Table will be populated by JavaScript -->
+          </div>
+
+        
+                  <!-- Chart Summary -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 text-center">
+            <div class="bg-blue-50 p-3 rounded">
+              <div class="text-2xl font-bold text-blue-600" id="total-consumed"></div>
+              <div class="text-sm text-gray-600">Total Consumed (L)</div>
+            </div>
+            <div class="bg-red-50 p-3 rounded">
+              <div class="text-2xl font-bold text-red-600" id="total-runtime"></div>
+              <div class="text-sm text-gray-600">Total Runtime (hrs)</div>
+            </div>
+            <div class="bg-green-50 p-3 rounded">
+              <div class="text-2xl font-bold text-green-600" id="avg-consumption"></div>
+              <div class="text-sm text-gray-600">Avg Consumption (L)</div>
+            </div>
+            <div class="bg-purple-50 p-3 rounded">
+              <div class="text-2xl font-bold text-purple-600" id="efficiency"></div>
+              <div class="text-sm text-gray-600">L per Hour</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="bg-gray-50 text-gray-700 py-4 mt-8 border-t border-gray-200">
+  <div class="max-w-full mx-auto px-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-5 text-center sm:text-left">
+ <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 sm:mt-0 mt-2 object-contain">   
+    <p class="text-sm flex items-center">
+      &copy; 2025 Daily Monitoring Dashboard — 
+      <span class="font-medium ml-1">EP-220 Toggle Oil</span>
+    </p>
+  </div>
+</footer>
+<script src="main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LPG Monitoring (6AM)</title>
+  <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<nav class="bg-white shadow">
+  <div class="max-w-full mx-auto px-4">
+    <div class="flex justify-between items-center h-14">
+
+      <!-- Logo + Title -->
+      <div class="flex items-center space-x-3">
+        <!-- Logo -->
+        <a href="index.html">
+          <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 w-auto">
+        </a>
+        <!-- Title -->
+        <div class="text-lg font-bold">Daily Monitoring Dashboard</div>
+      </div>
+
+      <!-- Desktop menu -->
+      <div class="hidden lg:flex space-x-6">
+        <!-- Oil Usage Dropdown -->
+        <div class="relative group">
+          <a href="#" class="hover:text-blue-500 font-semibold flex items-center">
+            Oil Usage in Operation
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </a>
+          <!-- Dropdown menu -->
+          <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div class="py-1">
+              <a href="tellus46.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 46</a>
+              <a href="tellus32.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 32</a>
+              <a href="index.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">EP-220</a>
+              <a href="PL-1000.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">PL-1000</a>
+              <a href="kerosene.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Kerosene</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other menu items -->
+        <a href="lpg.html" class="hover:text-blue-500 font-semibold">LPG Monitoring</a>
+      </div>
+
+      <!-- Mobile menu button -->
+      <div class="lg:hidden">
+        <button id="menu-btn" class="focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4">
+    <div class="mb-2">
+      <button id="mobile-oil-toggle" class="block py-1 hover:text-blue-500 font-semibold w-full text-left flex items-center justify-between">
+        Oil Usage in Operation
+        <svg id="mobile-arrow" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div id="mobile-oil-submenu" class="hidden ml-4 mt-1">
+        <a href="tellus46.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 46</a>
+        <a href="tellus36.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 32</a>
+        <a href="index.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">EP-220</a>
+        <a href="PL-1000.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">PL-1000</a>
+        <a href="kerosene.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Kerosene</a>
+      </div>
+    </div>
+
+    <!-- Other mobile menu items -->
+    <a href="lpg.html" class="block py-1 hover:text-blue-500">LPG Monitoring</a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="p-4">
+  <div class="max-w-full overflow-x-auto">
+    <div class="bg-white p-4 rounded shadow-md">
+      <div class="flex  flex-col sm:flex-row sm:items-center sm:justify-between">
+       <div class="flex items-center gap-2 mb-4">
+          <h1 id="category-title" class="text-lg font-bold">LPG Monitoring</h1>
+          <h1 class="text-lg font-bold">- Daily</h1>
+        </div>
+        <!-- Month/Year filters -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+          <div class="flex gap-2">
+            <select id="month-select" class="border rounded p-1">
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+
+            <select id="year-select" class="border rounded p-1">
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    
+<!-- Info Section -->
+       <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2">
+        <div>
+          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
+            <span>Kg/Tank:</span><span>5290</span>
+          </div>
+          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
+            <span>2 Tank Cap:</span><span>10580</span>
+          </div>
+          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
+            <span>2 Tank Cap at 85%:</span><span>8993</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCROLLABLE TABLE -->
+      <div class="overflow-x-auto border border-gray-300 rounded">
+        <table id="daily-table" class="border-collapse text-center text-xs min-w-full">
+  <thead class="sticky top-0 bg-gray-100 z-10">
+    <tr class="bg-blue-50">
+      <th class="border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-xs whitespace-nowrap">Items</th>
+      <!-- JS will fill these day columns dynamically -->
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Before Delivery: Tank 1</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Before Delivery: Tank 2</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+    <!-- <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Activities</td>
+      
+    </tr> -->
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="border border-gray-300 px-2 py-1">&nbsp;</td>
+        <!-- Empty Space / Separator-->
+    </tr>
+     <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Consumed %: Tank 1</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Consumed %: Tank 2</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+        <td class="border border-gray-300 px-2 py-1">&nbsp;</td>
+        <!-- Empty Space / Separator-->
+    </tr>
+   
+     <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Estimated in (Kg): Tank 1</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Estimated in (Kg): Tank 2</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+     <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Estimate Total</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Accumulated</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+     <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Inggot Used (pcs)</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Ingot Bundle</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1">&nbsp;</td>
+    </tr> 
+   <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Machine on Operation</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Furnace On</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+     <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1">&nbsp;</td>
+    </tr> 
+     
+     <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">QTY Delivered (Kg): Tank 1</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">QTY Delivered (Kg): Tank 2</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Total(kg) Metering</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Total(kg) Truck Scale</td>
+      <!-- JS will fill daily values here -->
+    </tr>
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1">&nbsp;</td>
+    </tr> 
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Total(%): TANK 1 DELIVERY</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+    <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+      <td class="border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap">Total(%): TANK 2 DELIVERY</td>
+      <!-- JS will fill daily values here -->
+    </tr> 
+  </tbody>
+</table>
+      </div>
+
+     
+
+      <!-- CHART SECTION -->
+      <div class="mt-8">
+        <div class="bg-white p-6 rounded shadow-md">
+          <h2 class="text-lg font-bold mb-4">LPG Consumption Analysis</h2>
+          
+          <!-- Chart Controls -->
+          <div class="flex flex-wrap gap-4 mb-6">
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Chart Type:</label>
+              <select id="chart-type" class="border rounded p-2 text-sm">
+                <option value="line">Line Chart</option>
+                <option value="bar">Bar Chart</option>
+                <!-- <option value="area">Area Chart</option> -->
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Show:</label>
+              <label class="flex items-center gap-1">
+                <input type="checkbox" id="show-consumption" checked>
+                <span class="text-sm">Estimate Total</span>
+              </label>
+              <label class="flex items-center gap-1">
+                <input type="checkbox" id="show-runtime" checked>
+                <span class="text-sm">Runtime</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Chart Container -->
+          <div class="relative h-96">
+            <canvas id="oilChart"></canvas>
+          </div>
+
+          <!-- Chart Summary -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center">
+            <div class="bg-blue-50 p-3 rounded">
+              <div class="text-2xl font-bold text-blue-600" id="total-consumed"></div>
+              <div class="text-sm text-gray-600">Total Consumed (L)</div>
+            </div>
+            <div class="bg-red-50 p-3 rounded">
+              <div class="text-2xl font-bold text-red-600" id="total-runtime"></div>
+              <div class="text-sm text-gray-600">Total Runtime (hrs)</div>
+            </div>
+            <div class="bg-green-50 p-3 rounded">
+              <div class="text-2xl font-bold text-green-600" id="avg-consumption"></div>
+              <div class="text-sm text-gray-600">Avg Consumption (L)</div>
+            </div>
+            <div class="bg-purple-50 p-3 rounded">
+              <div class="text-2xl font-bold text-purple-600" id="efficiency"></div>
+              <div class="text-sm text-gray-600">L per Hour</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="bg-gray-50 text-gray-700 py-4 mt-8 border-t border-gray-200">
+  <div class="max-w-full mx-auto px-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-5 text-center sm:text-left">
+ <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 sm:mt-0 mt-2 object-contain">   
+    <p class="text-sm flex items-center">
+      &copy; 2025 Daily Monitoring Dashboard — 
+      <span class="font-medium ml-1">LPG Monitoring</span>
+    </p>
+  </div>
+</footer>
+<script src="lpg.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hydraulic Oil: Tellus-46</title>
+  <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <style>
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css');
+        
+        .table-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .row-hover:hover {
+            background-color: #f9fafb;
+        }
+        
+        .filled-row {
+            background-color: #f0f9ff;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<nav class="bg-white shadow">
+  <div class="max-w-full mx-auto px-4">
+    <div class="flex justify-between items-center h-14">
+
+      <!-- Logo + Title -->
+      <div class="flex items-center space-x-3">
+        <!-- Logo -->
+        <a href="index.html">
+          <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 w-auto">
+        </a>
+        <!-- Title -->
+        <div class="text-lg font-bold">Daily Monitoring Dashboard</div>
+      </div>
+
+      <!-- Desktop menu -->
+      <div class="hidden lg:flex space-x-6">
+        <!-- Oil Usage Dropdown -->
+        <div class="relative group">
+          <a href="#" class="hover:text-blue-500 font-semibold flex items-center">
+            Oil Usage in Operation
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </a>
+          <!-- Dropdown menu -->
+          <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div class="py-1">
+              <a href="tellus46.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 46</a>
+              <a href="tellus32.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 32</a>
+              <a href="index.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">EP-220</a>
+              <a href="PL-1000.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">PL-1000</a>
+              <a href="kerosene.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Kerosene</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other menu items -->
+        <a href="lpg.html" class="hover:text-blue-500 font-semibold">LPG Monitoring</a>
+      </div>
+
+      <!-- Mobile menu button -->
+      <div class="lg:hidden">
+        <button id="menu-btn" class="focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4">
+    <div class="mb-2">
+      <button id="mobile-oil-toggle" class="block py-1 hover:text-blue-500 font-semibold w-full text-left flex items-center justify-between">
+        Oil Usage in Operation
+        <svg id="mobile-arrow" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div id="mobile-oil-submenu" class="hidden ml-4 mt-1">
+        <a href="tellus46.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 46</a>
+        <a href="tellus36.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 32</a>
+        <a href="index.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">EP-220</a>
+        <a href="PL-1000.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">PL-1000</a>
+        <a href="kerosene.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Kerosene</a>
+      </div>
+    </div>
+
+    <!-- Other mobile menu items -->
+    <a href="lpg.html" class="block py-1 hover:text-blue-500">LPG Monitoring</a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="p-4">
+  <div class="max-w-full overflow-x-auto">
+    <div class="bg-white p-4 rounded shadow-md">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-2 mb-4">
+        <h1 id="category-title" class="text-lg font-bold">Hydraulic Oil</h1>
+        <h1 class="text-lg font-bold">- Tellus 32</h1>
+      </div>
+        <!-- Month/Year filters -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+          <div id="loading-indicator" class="hidden text-sm text-blue-600">
+            <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading data...
+          </div>
+          <div class="flex gap-2">
+            <select id="month-select" class="border rounded p-1">
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+
+            <select id="year-select" class="border rounded p-1">
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- SCROLLABLE TABLE -->
+      <div class="overflow-x-auto rounded-lg shadow border border-gray-200 mb-6">
+        <table id="refill-table" class="min-w-full text-xs text-center border-collapse">
+          <thead class="bg-gradient-to-r from-blue-50 to-blue-100 sticky top-0">
+            <tr>
+              <th class="px-3 py-2 border border-gray-300 font-semibold text-gray-700">DATE</th>
+              <th class="px-3 py-2 border border-gray-300 font-semibold text-gray-700">TIME REFILL</th>
+              <th class="px-3 py-2 border border-gray-300 font-semibold text-gray-700">QTY. REFILL (L)</th>
+              <th class="px-3 py-2 border border-gray-300 font-semibold text-gray-700">REMAINING QTY (L)</th>
+              <th class="px-3 py-2 border border-gray-300 font-semibold text-gray-700">REFILL BY</th>
+              <th class="px-3 py-2 border border-gray-300 font-semibold text-gray-700">MACHINE REFILLED</th>
+              <th class="px-3 py-2 border border-gray-300 font-semibold text-gray-700">REMARKS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated by JavaScript -->
+            <tr class="text-center">
+              <td colspan="8" class="px-3 py-8 text-gray-500">
+                <div class="flex flex-col items-center gap-2">
+                  <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <span>Loading refill data...</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Info Section -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 hidden">
+        <div class="border border-gray-400 p-3 rounded bg-gray-50">
+          <h3 class="font-bold mb-2">Usage Summary</h3>
+          <div class="space-y-1">
+            <div class="flex justify-between">
+              <span id="avg-consumption-day-label">Average usage / day:</span>
+              <span id="avg-consumption-day" class="font-semibold">0.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span id="monthly-consumption-label">Monthly usage:</span>
+              <span id="monthly-consumption" class="font-semibold">0.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Current Stock:</span>
+              <span id="current-stock" class="font-semibold">0.00</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="border border-gray-400 p-3 rounded bg-gray-50">
+          <h3 class="font-bold mb-2">Delivery Information</h3>
+          <div id="delivery-date" class="text-sm">
+            No deliveries recorded
+          </div>
+        </div>
+      </div>
+
+      <!-- SCROLLABLE TABLE -->
+      <div class="max-w-5xl mx-auto overflow-x-auto">
+        
+      </div>
+     
+
+      <!-- CHART SECTION -->
+      <div class="mt-8">
+        <div class="bg-white p-6 rounded shadow-md">
+          <h2 class="text-lg font-bold mb-4">Kerosene Usage Analysis</h2>
+          
+          <!-- Chart Controls -->
+          <!-- <div class="flex flex-wrap gap-4 mb-6">
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Chart Type:</label>
+              <select id="chart-type" class="border rounded p-2 text-sm">
+                <option value="line" selected>Line Chart</option>
+                <option value="bar">Bar Chart</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium">Show:</label>
+              <label class="flex items-center gap-1">
+                <input type="checkbox" id="show-consumption" checked>
+                <span class="text-sm">Daily Usage</span>
+              </label>
+              <label class="flex items-center gap-1">
+                <input type="checkbox" id="show-runtime" checked>
+                <span class="text-sm">Stock Level</span>
+              </label>
+            </div>
+          </div> -->
+
+          <!-- Chart Container -->
+          <!-- <div class="relative mb-8">
+            <canvas id="oilChart" style="height:320px;max-height:320px;width:100%;"></canvas>
+          </div> -->
+
+          <!-- Chart Summary -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 text-center">
+            <div class="bg-blue-50 p-3 rounded">
+              <div class="text-2xl font-bold text-blue-600" id="total-consumed">0.00</div>
+              <div class="text-sm text-gray-600">Total Used (L)</div>
+            </div>
+            <div class="bg-green-50 p-3 rounded">
+              <div class="text-2xl font-bold text-green-600" id="current-stock-chart">0.00</div>
+              <div class="text-sm text-gray-600">Current Stock (L)</div>
+            </div>
+            <div class="bg-purple-50 p-3 rounded">
+              <div class="text-2xl font-bold text-purple-600" id="avg-consumption">0.00</div>
+              <div class="text-sm text-gray-600">Avg Usage (L)</div>
+            </div>
+            <div class="bg-orange-50 p-3 rounded">
+              <div class="text-2xl font-bold text-orange-600" id="days-with-data">0</div>
+              <div class="text-sm text-gray-600">Days with Data</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="bg-gray-50 text-gray-700 py-4 border-t border-gray-200 fixed bottom-0 left-0 w-full">
+  <div class="max-w-full mx-auto px-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-5 text-center sm:text-left">
+    <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 sm:mt-0 mt-2 object-contain">
+    <p class="text-sm flex items-center">
+      &copy; 2025 Daily Monitoring Dashboard —
+      <span class="font-medium ml-1">Tellus 32 Hydraulic Oil</span>
+    </p>
+    
+  </div>
+</footer>
+
+<!-- Error Message -->
+<div id="error-message" class="hidden fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50">
+  <span id="error-text">An error occurred while loading data.</span>
+</div>
+
+<script src="tellus32.js"></script>
+
+</body>
+</html>

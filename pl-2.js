@@ -69,8 +69,25 @@ function getCurrentCategory() {
   return 'PL-1000';
 }
 
+function getCurrentPlantLocation() {
+  const plantSelect = document.getElementById('plant-select');
+  return plantSelect ? plantSelect.value : 'GGPC';
+}
+
 function filterRecordsByCategory(records, category) {
   return records.filter(r => r['Consumption_Category']?.value === category);
+}
+
+function filterRecordsByPlantLocation(records, plantLocation) {
+  return records.filter(r => r['Plant_Location']?.value === plantLocation);
+}
+
+// Apply both category and plant location filters
+function filterRecords(records, category, plantLocation) {
+  return records.filter(r => 
+    r['Consumption_Category']?.value === category && 
+    r['Plant_Location']?.value === plantLocation
+  );
 }
 
 // Group consumption data by machine number
@@ -155,9 +172,14 @@ function renderMachineConsumptionTable(records, config) {
   // Calculate grand total
   const grandTotal = machines.reduce((sum, machine) => sum + machineData[machine].totalConsumption, 0);
   
+  // Get current plant location for display
+  const currentPlant = getCurrentPlantLocation();
+  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+  
   let tableHTML = `
     <div class="bg-white p-6 rounded shadow-md">
-      <h3 class="text-lg font-bold mb-4">Machine Consumption Summary</h3>
+      <h3 class="text-lg font-bold mb-2">Machine Consumption Summary</h3>
+      <p class="text-sm text-gray-600 mb-4">Plant: ${plantName}</p>
       <div class="overflow-x-auto">
         <table class="min-w-full border-collapse border border-gray-300">
           <thead class="bg-blue-50">
@@ -256,7 +278,10 @@ function renderStats(records, config, daysInMonth, selectedMonth, selectedYear) 
   document.getElementById('monthly-consumption').textContent = totalConsumed.toFixed(2);
 
   const monthName = MONTH_NAMES[parseInt(selectedMonth, 10) - 1];
-  document.getElementById('initial-data-title').textContent = `Initial Data for ${monthName} ${selectedYear}`;
+  const currentPlant = getCurrentPlantLocation();
+  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+  
+  document.getElementById('initial-data-title').textContent = `Initial Data for ${monthName} ${selectedYear} - ${plantName}`;
 
   const deliveryRecords = records
     .filter(r => {
@@ -296,6 +321,9 @@ function renderChart(records, daysInMonth, selectedYear, selectedMonth, config) 
 
   if (oilChart) oilChart.destroy();
 
+  const currentPlant = getCurrentPlantLocation();
+  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+
   oilChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -320,7 +348,7 @@ function renderChart(records, daysInMonth, selectedYear, selectedMonth, config) 
       plugins: {
         title: {
           display: true,
-          text: `Daily Oil Consumption - ${MONTH_NAMES[parseInt(selectedMonth, 10) - 1]} ${selectedYear}`,
+          text: `Daily Oil Consumption - ${MONTH_NAMES[parseInt(selectedMonth, 10) - 1]} ${selectedYear} (${plantName})`,
           font: { size: 16 }
         }
       },
@@ -377,6 +405,9 @@ function renderMachineChart(records, config, isStacked = false) {
   let labels = [];
   let chartTitle = 'Oil Consumption by Machine';
 
+  const currentPlant = getCurrentPlantLocation();
+  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+
   if (isStacked) {
     // Create a single bar with stacked segments for each machine
     labels = ['Total Oil Consumption'];
@@ -394,7 +425,7 @@ function renderMachineChart(records, config, isStacked = false) {
       });
     });
 
-    chartTitle = 'Stacked Oil Consumption by Machine';
+    chartTitle = `Stacked Oil Consumption by Machine (${plantName})`;
   } else {
     // Regular individual bars
     labels = machines.map(machine => isNaN(machine) ? machine : `Machine ${machine}`);
@@ -407,6 +438,8 @@ function renderMachineChart(records, config, isStacked = false) {
       borderColor: colors.slice(0, machines.length).map(color => color.replace('0.8', '1')),
       borderWidth: 2
     }];
+
+    chartTitle = `Oil Consumption by Machine (${plantName})`;
   }
 
   machineChart = new Chart(ctx, {
@@ -475,11 +508,13 @@ function renderMachineChart(records, config, isStacked = false) {
 async function loadAndRenderData() {
   const monthSelect = document.getElementById('month-select');
   const yearSelect = document.getElementById('year-select');
+  const plantSelect = document.getElementById('plant-select');
   
-  if (!monthSelect || !yearSelect) return;
+  if (!monthSelect || !yearSelect || !plantSelect) return;
 
   const selectedMonth = monthSelect.value;
   const selectedYear = yearSelect.value;
+  const selectedPlant = plantSelect.value;
   const currentCategory = getCurrentCategory();
   const config = CONFIG_MAP[currentCategory];
 
@@ -489,12 +524,14 @@ async function loadAndRenderData() {
     // Show loading indicator
     showLoadingIndicator();
     
-    console.log(`Loading data for ${selectedMonth}/${selectedYear}`);
+    console.log(`Loading data for ${selectedMonth}/${selectedYear}, Plant: ${selectedPlant}`);
     allRecords = await fetchKintoneAllData(selectedMonth, selectedYear);
-    const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+    
+    // Apply both category and plant location filters
+    const filteredRecords = filterRecords(allRecords, currentCategory, selectedPlant);
     const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
 
-    console.log(`Filtered ${filteredRecords.length} records for category ${currentCategory}`);
+    console.log(`Filtered ${filteredRecords.length} records for category ${currentCategory} and plant ${selectedPlant}`);
 
     renderTable(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
     renderStats(filteredRecords, config, daysInMonth, selectedMonth, selectedYear);
@@ -536,6 +573,7 @@ function handleChartViewChange() {
   if (!chartView || !dailyChartContainer || !machineChartContainer) return;
 
   const currentCategory = getCurrentCategory();
+  const currentPlant = getCurrentPlantLocation();
   const config = CONFIG_MAP[currentCategory];
   
   if (chartView.value === 'machine') {
@@ -548,7 +586,7 @@ function handleChartViewChange() {
     
     // Render machine chart with current data
     if (config && allRecords.length > 0) {
-      const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+      const filteredRecords = filterRecords(allRecords, currentCategory, currentPlant);
       renderMachineChart(filteredRecords, config, isStacked);
     }
   } else {
@@ -562,7 +600,7 @@ function handleChartViewChange() {
       if (monthSelect && yearSelect) {
         const selectedMonth = monthSelect.value;
         const selectedYear = yearSelect.value;
-        const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+        const filteredRecords = filterRecords(allRecords, currentCategory, currentPlant);
         const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
         renderChart(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
       }
@@ -593,6 +631,7 @@ function toggleMachineSummaryTable() {
   if (!summaryTable || !toggleBtn) return;
 
   const currentCategory = getCurrentCategory();
+  const currentPlant = getCurrentPlantLocation();
   const config = CONFIG_MAP[currentCategory];
   
   if (summaryTable.style.display === 'none') {
@@ -609,7 +648,7 @@ function toggleMachineSummaryTable() {
       const selectedYear = yearSelect.value;
       
       // Get filtered records and re-render with stacking
-      const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+      const filteredRecords = filterRecords(allRecords, currentCategory, currentPlant);
       renderMachineChart(filteredRecords, config, true); // Enable stacking
       renderMachineConsumptionTable(filteredRecords, config); // Show summary table
     }
@@ -627,7 +666,7 @@ function toggleMachineSummaryTable() {
       const selectedYear = yearSelect.value;
       
       // Get filtered records and re-render without stacking
-      const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+      const filteredRecords = filterRecords(allRecords, currentCategory, currentPlant);
       renderMachineChart(filteredRecords, config, false); // Disable stacking
     }
   }
@@ -636,6 +675,7 @@ function toggleMachineSummaryTable() {
 function setupEventHandlers() {
   const monthSelect = document.getElementById('month-select');
   const yearSelect = document.getElementById('year-select');
+  const plantSelect = document.getElementById('plant-select');
   const chartView = document.getElementById('chart-view');
   const chartType = document.getElementById('chart-type');
   const showConsumption = document.getElementById('show-consumption');
@@ -643,6 +683,7 @@ function setupEventHandlers() {
 
   if (monthSelect) monthSelect.addEventListener('change', loadAndRenderData);
   if (yearSelect) yearSelect.addEventListener('change', loadAndRenderData);
+  if (plantSelect) plantSelect.addEventListener('change', loadAndRenderData);
   if (chartView) chartView.addEventListener('change', handleChartViewChange);
   if (chartType) chartType.addEventListener('change', handleChartTypeChange);
   if (showConsumption) showConsumption.addEventListener('change', loadAndRenderData);
@@ -672,9 +713,11 @@ function initializePage() {
   const now = new Date();
   const monthSelect = document.getElementById('month-select');
   const yearSelect = document.getElementById('year-select');
+  const plantSelect = document.getElementById('plant-select');
   
   if (monthSelect) monthSelect.value = String(now.getMonth() + 1).padStart(2, '0');
   if (yearSelect) yearSelect.value = now.getFullYear().toString();
+  if (plantSelect) plantSelect.value = 'GGPC - Gunma Gohkin'; // Default to GGPC
 
   setupEventHandlers();
   loadAndRenderData();
@@ -685,3 +728,149 @@ if (document.readyState === 'loading') {
 } else {
   initializePage();
 }
+
+// Add this debugging function to your existing code
+function debugDataFiltering() {
+  console.log('=== DEBUG DATA FILTERING ===');
+  console.log('Total records fetched:', allRecords.length);
+  
+  if (allRecords.length > 0) {
+    // Check the first few records to see their structure
+    console.log('Sample record structure:', allRecords[0]);
+    
+    // Check Plant_Location values
+    const plantLocations = [...new Set(allRecords.map(r => r['Plant_Location']?.value).filter(v => v))];
+    console.log('Unique Plant_Location values found:', plantLocations);
+    
+    // Check Consumption_Category values
+    const categories = [...new Set(allRecords.map(r => r['Consumption_Category']?.value).filter(v => v))];
+    console.log('Unique Consumption_Category values found:', categories);
+    
+    const selectedPlant = getCurrentPlantLocation();
+    const selectedCategory = getCurrentCategory();
+    console.log('Selected plant filter:', selectedPlant);
+    console.log('Selected category filter:', selectedCategory);
+    
+    // Test filtering step by step
+    const categoryFiltered = filterRecordsByCategory(allRecords, selectedCategory);
+    console.log('Records after category filter:', categoryFiltered.length);
+    
+    const plantFiltered = filterRecordsByPlantLocation(allRecords, selectedPlant);
+    console.log('Records after plant filter:', plantFiltered.length);
+    
+    const bothFiltered = filterRecords(allRecords, selectedCategory, selectedPlant);
+    console.log('Records after both filters:', bothFiltered.length);
+    
+    if (bothFiltered.length > 0) {
+      console.log('Sample filtered record:', bothFiltered[0]);
+    }
+  }
+  console.log('=== END DEBUG ===');
+}
+
+// Modified loadAndRenderData function with debugging
+async function loadAndRenderData() {
+  const monthSelect = document.getElementById('month-select');
+  const yearSelect = document.getElementById('year-select');
+  const plantSelect = document.getElementById('plant-select');
+  
+  if (!monthSelect || !yearSelect || !plantSelect) return;
+
+  const selectedMonth = monthSelect.value;
+  const selectedYear = yearSelect.value;
+  const selectedPlant = plantSelect.value;
+  const currentCategory = getCurrentCategory();
+  const config = CONFIG_MAP[currentCategory];
+
+  if (!config) return;
+
+  try {
+    // Show loading indicator
+    showLoadingIndicator();
+    
+    console.log(`Loading data for ${selectedMonth}/${selectedYear}, Plant: ${selectedPlant}`);
+    allRecords = await fetchKintoneAllData(selectedMonth, selectedYear);
+    
+    // ADD DEBUGGING HERE
+    //debugDataFiltering();ss
+    
+    // Apply both category and plant location filters
+    const filteredRecords = filterRecords(allRecords, currentCategory, selectedPlant);
+    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+    console.log(`Filtered ${filteredRecords.length} records for category ${currentCategory} and plant ${selectedPlant}`);
+
+    renderTable(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
+    renderStats(filteredRecords, config, daysInMonth, selectedMonth, selectedYear);
+    
+    // Check if machine summary is currently shown to maintain stacking state
+    const summaryTable = document.getElementById('machine-summary-table');
+    const isStacked = summaryTable && summaryTable.style.display !== 'none';
+    
+    // Render appropriate chart based on view selection
+    const chartView = document.getElementById('chart-view');
+    if (chartView && chartView.value === 'machine') {
+      renderMachineChart(filteredRecords, config, isStacked);
+    } else {
+      renderChart(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
+    }
+
+    // Render machine summary table if it's currently shown
+    if (isStacked) {
+      renderMachineConsumptionTable(filteredRecords, config);
+    }
+
+    // Hide loading indicator
+    hideLoadingIndicator();
+
+  } catch (error) {
+    console.error('Error loading data:', error);
+    hideLoadingIndicator();
+    
+    // Show error message to user
+    alert('Failed to load data from Kintone. Please check your connection and try again.');
+  }
+}
+
+// // Also add a temporary function to bypass plant filtering for testing
+// function loadAndRenderDataWithoutPlantFilter() {
+//   const monthSelect = document.getElementById('month-select');
+//   const yearSelect = document.getElementById('year-select');
+  
+//   if (!monthSelect || !yearSelect) return;
+
+//   const selectedMonth = monthSelect.value;
+//   const selectedYear = yearSelect.value;
+//   const currentCategory = getCurrentCategory();
+//   const config = CONFIG_MAP[currentCategory];
+
+//   if (!config) return;
+
+//   try {
+//     showLoadingIndicator();
+    
+//     console.log(`Loading data WITHOUT plant filter for ${selectedMonth}/${selectedYear}`);
+    
+//     // Only filter by category, not plant
+//     const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+//     const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+//     console.log(`Filtered ${filteredRecords.length} records for category ${currentCategory} only`);
+
+//     renderTable(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
+//     renderStats(filteredRecords, config, daysInMonth, selectedMonth, selectedYear);
+    
+//     const chartView = document.getElementById('chart-view');
+//     if (chartView && chartView.value === 'machine') {
+//       renderMachineChart(filteredRecords, config, false);
+//     } else {
+//       renderChart(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
+//     }
+
+//     hideLoadingIndicator();
+
+//   } catch (error) {
+//     console.error('Error loading data:', error);
+//     hideLoadingIndicator();
+//   }
+// }

@@ -30,73 +30,13 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-// Generate sample data for demonstration purposes (fallback)
-function generateSampleData(month, year) {
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const records = [];
-  
-  // Available machines for random selection
-  const availableMachines = ['1', '2', '3', '4', '5'];
-  
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
-    // Generate realistic sample data
-    const totalConsumed = Math.round((Math.random() * 20 + 10) * 100) / 100; // 10-30 liters
-    
-    // Randomly select 1-3 machines that were used this day
-    const numMachinesUsed = Math.ceil(Math.random() * 3); // 1 to 3 machines
-    const machinesUsed = [];
-    
-    for (let i = 0; i < numMachinesUsed; i++) {
-      let randomMachine;
-      do {
-        randomMachine = availableMachines[Math.floor(Math.random() * availableMachines.length)];
-      } while (machinesUsed.includes(randomMachine));
-      machinesUsed.push(randomMachine);
-    }
-    
-    // Join machine numbers with comma if multiple machines
-    const machineRun = machinesUsed.join(', ');
-    
-    const remainingStock = Math.round((Math.random() * 100 + 200) * 100) / 100; // 200-300 liters
-    
-    // Occasional deliveries (about 20% chance)
-    const delivery = Math.random() < 0.2 ? Math.ceil(Math.random() * 5) : 0;
-    const refill = delivery > 0 ? delivery : 0;
-    
-    const record = {
-      'Date_Today': { value: dateStr },
-      'Consumption_Category': { value: 'PL-1000' },
-      'Total_Consumed_PL': { value: totalConsumed.toString() },
-      'Machine_Run_PL': { value: machineRun },
-      'Remaining_Stock_PL': { value: remainingStock.toString() },
-      'Delivery_PL': { value: delivery.toString() },
-      'Refill_PL': { value: refill.toString() },
-      'Total_Stock_PL_Pail': { value: Math.ceil(remainingStock / 20).toString() },
-      'Total_Stock_PL_Lit': { value: remainingStock.toString() }
-    };
-    
-    records.push(record);
-  }
-  
-  return records;
-}
-
-// Updated function to fetch real Kintone data
+// Updated function to fetch real Kintone data (without category filter)
 async function fetchKintoneAllData(month, year) {
   try {
     console.log(`Fetching Kintone data for ${month}/${year}`);
     
-    // Construct the API endpoint
-    const apiEndpoint = '/.netlify/functions/kintone';
-    const params = new URLSearchParams({
-      month: String(month).padStart(2, '0'),
-      year: year.toString(),
-      category: 'PL-1000'
-    });
-    
-    const url = `${apiEndpoint}?${params.toString()}`;
+    // Construct the API endpoint - NO CATEGORY FILTER
+    let url = '/.netlify/functions/kintone?month=' + month + '&year=' + year;
     console.log('Fetching from URL:', url);
     
     const response = await fetch(url);
@@ -115,14 +55,13 @@ async function fetchKintoneAllData(month, year) {
       console.log(`Successfully fetched ${data.records.length} records from Kintone`);
       return data.records;
     } else {
-      console.warn('No records found in Kintone response, using sample data');
-      return generateSampleData(month, year);
+      console.warn('No records found in Kintone response');
+      return [];
     }
     
   } catch (error) {
     console.error('Failed to fetch from Kintone:', error);
-    console.log('Falling back to sample data');
-    return generateSampleData(month, year);
+    throw error;
   }
 }
 

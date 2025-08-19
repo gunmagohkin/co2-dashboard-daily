@@ -30,7 +30,7 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-// Generate sample data for demonstration purposes
+// Generate sample data for demonstration purposes (fallback)
 function generateSampleData(month, year) {
   const daysInMonth = new Date(year, month, 0).getDate();
   const records = [];
@@ -69,7 +69,7 @@ function generateSampleData(month, year) {
       'Date_Today': { value: dateStr },
       'Consumption_Category': { value: 'PL-1000' },
       'Total_Consumed_PL': { value: totalConsumed.toString() },
-      'Machine_Run_PL': { value: machineRun }, // This now contains actual machine numbers used
+      'Machine_Run_PL': { value: machineRun },
       'Remaining_Stock_PL': { value: remainingStock.toString() },
       'Delivery_PL': { value: delivery.toString() },
       'Refill_PL': { value: refill.toString() },
@@ -83,12 +83,45 @@ function generateSampleData(month, year) {
   return records;
 }
 
+// Updated function to fetch real Kintone data
 async function fetchKintoneAllData(month, year) {
   try {
-    console.log(`Fetching data for ${month}/${year}`);
-    return generateSampleData(month, year);
+    console.log(`Fetching Kintone data for ${month}/${year}`);
+    
+    // Construct the API endpoint
+    const apiEndpoint = '/.netlify/functions/kintone';
+    const params = new URLSearchParams({
+      month: String(month).padStart(2, '0'),
+      year: year.toString(),
+      category: 'PL-1000'
+    });
+    
+    const url = `${apiEndpoint}?${params.toString()}`;
+    console.log('Fetching from URL:', url);
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Kintone response:', data);
+    
+    if (data.records && Array.isArray(data.records)) {
+      console.log(`Successfully fetched ${data.records.length} records from Kintone`);
+      return data.records;
+    } else {
+      console.warn('No records found in Kintone response, using sample data');
+      return generateSampleData(month, year);
+    }
+    
   } catch (error) {
-    console.error('Failed to fetch data:', error);
+    console.error('Failed to fetch from Kintone:', error);
+    console.log('Falling back to sample data');
     return generateSampleData(month, year);
   }
 }
@@ -140,6 +173,28 @@ function groupConsumptionByMachine(records, config) {
   });
   
   return machineData;
+}
+
+// Add loading indicator functions
+function showLoadingIndicator() {
+  // Show loading state in various elements
+  document.getElementById('total-consumed').textContent = 'Loading...';
+  document.getElementById('avg-consumption').textContent = 'Loading...';
+  document.getElementById('efficiency').textContent = 'Loading...';
+  document.getElementById('delivery-date').textContent = 'Loading...';
+  
+  // You can add a loading spinner or overlay here if needed
+  const chartContainers = document.querySelectorAll('#daily-chart-container, #machine-chart-container');
+  chartContainers.forEach(container => {
+    container.style.opacity = '0.5';
+  });
+}
+
+function hideLoadingIndicator() {
+  const chartContainers = document.querySelectorAll('#daily-chart-container, #machine-chart-container');
+  chartContainers.forEach(container => {
+    container.style.opacity = '1';
+  });
 }
 
 // Render machine consumption summary table
@@ -492,9 +547,15 @@ async function loadAndRenderData() {
   if (!config) return;
 
   try {
+    // Show loading indicator
+    showLoadingIndicator();
+    
+    console.log(`Loading data for ${selectedMonth}/${selectedYear}`);
     allRecords = await fetchKintoneAllData(selectedMonth, selectedYear);
     const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
     const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+    console.log(`Filtered ${filteredRecords.length} records for category ${currentCategory}`);
 
     renderTable(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
     renderStats(filteredRecords, config, daysInMonth, selectedMonth, selectedYear);
@@ -516,8 +577,15 @@ async function loadAndRenderData() {
       renderMachineConsumptionTable(filteredRecords, config);
     }
 
+    // Hide loading indicator
+    hideLoadingIndicator();
+
   } catch (error) {
     console.error('Error loading data:', error);
+    hideLoadingIndicator();
+    
+    // Show error message to user
+    alert('Failed to load data from Kintone. Please check your connection and try again.');
   }
 }
 
@@ -602,11 +670,9 @@ function toggleMachineSummaryTable() {
       const selectedYear = yearSelect.value;
       
       // Get filtered records and re-render with stacking
-      fetchKintoneAllData(selectedMonth, selectedYear).then(allRecords => {
-        const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
-        renderMachineChart(filteredRecords, config, true); // Enable stacking
-        renderMachineConsumptionTable(filteredRecords, config); // Show summary table
-      });
+      const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+      renderMachineChart(filteredRecords, config, true); // Enable stacking
+      renderMachineConsumptionTable(filteredRecords, config); // Show summary table
     }
   } else {
     summaryTable.style.display = 'none';
@@ -622,10 +688,8 @@ function toggleMachineSummaryTable() {
       const selectedYear = yearSelect.value;
       
       // Get filtered records and re-render without stacking
-      fetchKintoneAllData(selectedMonth, selectedYear).then(allRecords => {
-        const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
-        renderMachineChart(filteredRecords, config, false); // Disable stacking
-      });
+      const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
+      renderMachineChart(filteredRecords, config, false); // Disable stacking
     }
   }
 }

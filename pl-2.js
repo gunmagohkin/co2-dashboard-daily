@@ -174,7 +174,7 @@ function renderMachineConsumptionTable(records, config) {
   
   // Get current plant location for display
   const currentPlant = getCurrentPlantLocation();
-  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+  const plantName = currentPlant === 'GGPC - Gunma Gohkin' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
   
   let tableHTML = `
     <div class="bg-white p-6 rounded shadow-md">
@@ -279,7 +279,7 @@ function renderStats(records, config, daysInMonth, selectedMonth, selectedYear) 
 
   const monthName = MONTH_NAMES[parseInt(selectedMonth, 10) - 1];
   const currentPlant = getCurrentPlantLocation();
-  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+  const plantName = currentPlant === 'GGPC - Gunma Gohkin' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
   
   document.getElementById('initial-data-title').textContent = `Initial Data for ${monthName} ${selectedYear} - ${plantName}`;
 
@@ -322,7 +322,7 @@ function renderChart(records, daysInMonth, selectedYear, selectedMonth, config) 
   if (oilChart) oilChart.destroy();
 
   const currentPlant = getCurrentPlantLocation();
-  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+  const plantName = currentPlant === 'GGPC - Gunma Gohkin' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
 
   oilChart = new Chart(ctx, {
     type: 'line',
@@ -406,7 +406,7 @@ function renderMachineChart(records, config, isStacked = false) {
   let chartTitle = 'Oil Consumption by Machine';
 
   const currentPlant = getCurrentPlantLocation();
-  const plantName = currentPlant === 'GGPC' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
+  const plantName = currentPlant === 'GGPC - Gunma Gohkin' ? 'GGPC-Gunma Gohkin' : 'CDPC-Creative Diecast';
 
   if (isStacked) {
     // Create a single bar with stacked segments for each machine
@@ -792,7 +792,7 @@ async function loadAndRenderData() {
     allRecords = await fetchKintoneAllData(selectedMonth, selectedYear);
     
     // ADD DEBUGGING HERE
-    //debugDataFiltering();ss
+    //debugDataFiltering();
     
     // Apply both category and plant location filters
     const filteredRecords = filterRecords(allRecords, currentCategory, selectedPlant);

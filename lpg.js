@@ -126,7 +126,9 @@ function renderTable(allRecords, daysInMonth, selectedYear, selectedMonth, confi
             td.className = 'border border-gray-300 px-2 py-1 text-xs';
             if (item.key) {
                 const dateStr = `${selectedYear}-${selectedMonth}-${String(day).padStart(2, '0')}`;
-                const rec = allRecords.find(r => r['Date_Today']?.value === dateStr);
+                const sourceCategory = item.category || getCurrentCategory();
+                const relevantRecords = filterRecords(allRecords, sourceCategory, getCurrentPlant());
+                const rec = relevantRecords.find(r => r['Date_Today']?.value === dateStr);
                 td.textContent = rec?.[item.key]?.value || '';
             }
             row.appendChild(td);
@@ -343,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     allRecords = await fetchKintoneAllData(m, y);
     const filteredRecords = filterRecords(allRecords, category, p);
     
-    renderTable(filteredRecords, d, y, m, config);
+    renderTable(allRecords, d, y, m, config); // Pass allRecords to table renderer
     renderStats(filteredRecords);
     renderChart(filteredRecords, d, y, m);
     renderMachineConsumptionChart(filteredRecords);

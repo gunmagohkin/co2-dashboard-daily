@@ -26,11 +26,7 @@ const CONFIG_MAP = {
       { label: 'Total(%): TANK 1 DELIVERY', key: 'TDT_Tank1', category: 'LPG Monitoring' },
       { label: 'Total(%): TANK 2 DELIVERY', key: 'TDT_Tank2', category: 'LPG Monitoring' }
     ],
-    chart: {
-      consumptionKey: 'Consumed_Tank1',// change here
-      runtimeKey: 'Consumed_Tank2',   // change this with data from Production Activity Records
-      title: 'Estimate Total vs Runtime'
-    },
+    chart: {},
     deliveryKey: 'Delivery_LPG'
   },
   'Ingot Used': {
@@ -43,17 +39,12 @@ const CONFIG_MAP = {
 
 // Global variables
 let allRecords = [];
-let oilChart;
+let oilChart, machineChart, furnaceChart;
+let machineChartViewMode = 'detail'; // 'detail' or 'summary'
+let machineChartType = 'bar'; // 'bar' or 'line'
+let furnaceChartViewMode = 'detail';
+let furnaceChartType = 'bar';
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
-
-const MONTH_NAMES_SHORT = [
-  "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-  "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
-];
 
 // --- UTILITY FUNCTIONS ---
 async function fetchKintoneAllData(month, year) {
@@ -76,223 +67,345 @@ function filterRecordsByCategory(records, category) {
   return records.filter(r => r['Consumption_Category']?.value === category);
 }
 
+function generateHslaColors(amount) {
+  const colors = [];
+  for (let i = 0; i < amount; i++) {
+    const hue = (i * (360 / (amount * 1.618))) % 360; // Use golden angle for distinct colors
+    colors.push(`hsla(${hue}, 70%, 50%, 0.85)`);
+  }
+  return colors;
+}
+
+
 // --- TABLE RENDERING ---
 function renderTable(allRecords, daysInMonth, selectedYear, selectedMonth, config) {
-  const table = document.getElementById('daily-table');
-  if (!table) return;
-  const tbody = table.querySelector('tbody');
-  const headerRow = table.querySelector('thead tr');
+    const table = document.getElementById('daily-table');
+    if (!table) return;
+    
+    table.innerHTML = ''; // Clear existing content
 
-  // Clear headers except first
-  while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
+    const thead = document.createElement('thead');
+    thead.className = 'sticky top-0 bg-gray-100 z-10';
+    const headerRow = document.createElement('tr');
+    headerRow.className = 'bg-blue-50';
+    const itemsTh = document.createElement('th');
+    itemsTh.className = 'border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-xs whitespace-nowrap';
+    itemsTh.textContent = 'Items';
+    headerRow.appendChild(itemsTh);
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
 
-  // Add day headers
-  for (let day = 1; day <= daysInMonth; day++) {
-    const th = document.createElement('th');
-    th.className = 'border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-xs whitespace-nowrap';
-    th.textContent = day.toString();
-    headerRow.appendChild(th);
-  }
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+    
+    config.table.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition';
+        const td = document.createElement('td');
+        td.className = 'border border-gray-300 px-2 py-1 font-bold text-gray-700 text-xs whitespace-nowrap';
+        td.innerHTML = item.label || '&nbsp;';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    });
 
-  // Clear data cells except first column
-  Array.from(tbody.querySelectorAll('tr')).forEach(row => {
-    while (row.children.length > 1) row.removeChild(row.lastChild);
-  });
-
-  // Fill rows
-  config.table.forEach((item, rowIdx) => {
-    const row = tbody.children[rowIdx];
     for (let day = 1; day <= daysInMonth; day++) {
-      const td = document.createElement('td');
-      td.className = 'border border-gray-300 px-2 py-1 text-xs';
-
-      if (item.key) {
-        const dateStr = `${selectedYear}-${selectedMonth}-${String(day).padStart(2, '0')}`;
-
-        // Pick source category — default is current one
-        const sourceCategory = item.category || getCurrentCategory();
-        const sourceRecords = filterRecordsByCategory(allRecords, sourceCategory);
-
-        const rec = sourceRecords.find(r => r['Date_Today']?.value === dateStr);
-        td.textContent = rec?.[item.key]?.value || '';
-      } else {
-        td.textContent = ''; // space row
-      }
-      row.appendChild(td);
+        const th = document.createElement('th');
+        th.className = 'border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-xs whitespace-nowrap';
+        th.textContent = day.toString();
+        headerRow.appendChild(th);
     }
-  });
+    
+    config.table.forEach((item, rowIdx) => {
+        const row = tbody.children[rowIdx];
+        for (let day = 1; day <= daysInMonth; day++) {
+            const td = document.createElement('td');
+            td.className = 'border border-gray-300 px-2 py-1 text-xs';
+            if (item.key) {
+                const dateStr = `${selectedYear}-${selectedMonth}-${String(day).padStart(2, '0')}`;
+                const sourceCategory = item.category || getCurrentCategory();
+                const sourceRecords = filterRecordsByCategory(allRecords, sourceCategory);
+                const rec = sourceRecords.find(r => r['Date_Today']?.value === dateStr);
+                td.textContent = rec?.[item.key]?.value || '';
+            }
+            row.appendChild(td);
+        }
+    });
 }
 
 // --- STATS RENDERING ---
-function renderStats(records, config, daysInMonth, selectedMonth, selectedYear) {
-  const totalConsumed = records.reduce((sum, r) => sum + (parseFloat(r[config.chart.consumptionKey]?.value) || 0), 0);
-  const totalRuntime = records.reduce((sum, r) => sum + (parseFloat(r[config.chart.runtimeKey]?.value) || 0), 0);
-  const avgConsumption = daysInMonth ? totalConsumed / daysInMonth : 0;
-  const efficiency = totalRuntime ? totalConsumed / totalRuntime : 0;
-
-  const totalElem = document.getElementById('total-consumed');
-  if (totalElem) totalElem.textContent = totalConsumed.toFixed(2);
-
-  const runtimeElem = document.getElementById('total-runtime');
-  if (runtimeElem) runtimeElem.textContent = totalRuntime.toFixed(2);
-
-  const avgElem = document.getElementById('avg-consumption');
-  if (avgElem) avgElem.textContent = avgConsumption.toFixed(2);
-
-  const effElem = document.getElementById('efficiency');
-  if (effElem) effElem.textContent = efficiency.toFixed(2);
-
-  const avgDayElem = document.getElementById('avg-consumption-day');
-  if (avgDayElem) avgDayElem.textContent = avgConsumption.toFixed(2);
-
-  const avgDayLabel = document.getElementById('avg-consumption-day-label');
-  if (avgDayLabel) avgDayLabel.textContent = "Average consumption / day:";
-
-  const monthlyElem = document.getElementById('monthly-consumption');
-  if (monthlyElem) monthlyElem.textContent = totalConsumed.toFixed(2);
-
-  const monthlyLabel = document.getElementById('monthly-consumption-label');
-  if (monthlyLabel) monthlyLabel.textContent = "Monthly consumption:";
-
-  const deliveryElem = document.getElementById('delivery-date');
-  if (deliveryElem) {
-    const deliveryRecords = records
-      .filter(r => {
-        const val = r[config.deliveryKey]?.value;
-        return val && val !== '' && !isNaN(val) && Number(val) > 0;
-      })
-      .map(r => {
-        const day = r['Date_Today']?.value
-          ? new Date(r['Date_Today'].value).getDate()
-          : null;
-        const amount = r[config.deliveryKey]?.value;
-        return { day, amount };
-      })
-      .filter(r => r.day !== null);
-
-    if (deliveryRecords.length) {
-      const monthName = MONTH_NAMES[parseInt(selectedMonth, 10) - 1];
-      deliveryElem.innerHTML = deliveryRecords
-        .map(rec => `${monthName} ${rec.day} – ${rec.amount} Pail`)
-        .join('<br>');
-    } else {
-      deliveryElem.textContent = '-';
+function renderStats(records) {
+  let totalConsumedPercent = 0, daysWithRecords = 0;
+  records.forEach(r => {
+    const dailyTotal = (parseFloat(r['Consumed_Tank1']?.value) || 0) + (parseFloat(r['Consumed_Tank2']?.value) || 0);
+    if (dailyTotal > 0) {
+      totalConsumedPercent += dailyTotal;
+      daysWithRecords++;
     }
-  }
+  });
+  const avgConsumption = daysWithRecords > 0 ? totalConsumedPercent / daysWithRecords : 0;
+  
+  const totalStr = totalConsumedPercent.toFixed(2) + '%';
+  const avgStr = avgConsumption.toFixed(2) + '%';
+  
+  document.getElementById('total-consumed').textContent = totalStr;
+  document.getElementById('avg-consumption').textContent = avgStr;
+  document.getElementById('total-consumed-machine').textContent = totalStr;
+  document.getElementById('avg-consumption-machine').textContent = avgStr;
+  document.getElementById('total-consumed-furnace').textContent = totalStr;
+  document.getElementById('avg-consumption-furnace').textContent = avgStr;
 }
 
-// --- CHART RENDERING ---
-function renderChart(records, daysInMonth, selectedYear, selectedMonth, config) {
-  const labels = [];
-  const consumption = [];
-  const runtime = [];
+// --- CHART RENDERING 1: Daily Consumption ---
+function renderChart(records, daysInMonth, selectedYear, selectedMonth) {
+  const labels = [], totalConsumptionData = [], machineData = [];
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${selectedYear}-${selectedMonth}-${String(day).padStart(2, '0')}`;
     const rec = records.find(r => r['Date_Today']?.value === dateStr);
     labels.push(day.toString());
-    consumption.push(rec && rec[config.chart.consumptionKey] ? parseFloat(rec[config.chart.consumptionKey].value) || 0 : 0);
-    runtime.push(rec && rec[config.chart.runtimeKey] ? parseFloat(rec[config.chart.runtimeKey].value) || 0 : 0);
+    totalConsumptionData.push((parseFloat(rec?.['Consumed_Tank1']?.value) || 0) + (parseFloat(rec?.['Consumed_Tank2']?.value) || 0));
+    machineData.push(rec?.['Machine_no_Operation']?.value || 'N/A');
   }
-
   const ctx = document.getElementById('oilChart').getContext('2d');
-  if (oilChart) {
-    oilChart.data.labels = labels;
-    oilChart.data.datasets[0].data = consumption;
-    oilChart.data.datasets[1].data = runtime;
-    oilChart.options.plugins.title.text = config.chart.title;
-    oilChart.update();
-  } else {
-    oilChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Consumed Tank 1',
-            data: consumption,
-            backgroundColor: 'rgba(59,130,246,0.85)',
-            borderColor: 'rgba(59,130,246,1)',
-            yAxisID: 'y',
-          },
-          {
-            label: 'Consumed Tank 2',
-            data: runtime,
-            backgroundColor: 'rgba(239,68,68,0.85)',
-            borderColor: 'rgba(239,68,68,1)',
-            yAxisID: 'y1',
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: config.chart.title
-          }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false,
-        },
-        scales: {
-          y: {
-            type: 'linear',
-            display: true,
-            position: 'left',
-            title: { display: true, text: 'Estimate Total' }
-          },
-          y1: {
-            type: 'linear',
-            display: true,
-            position: 'right',
-            grid: { drawOnChartArea: false },
-            title: { display: true, text: 'Runtime' }
+  if (oilChart) oilChart.destroy();
+  oilChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Total Consumed (%)', data: totalConsumptionData, customData: machineData,
+        backgroundColor: 'rgba(59, 130, 246, 0.85)', borderColor: 'rgba(59, 130, 246, 1)',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        title: { display: true, text: 'Total Daily LPG Consumption' },
+        tooltip: {
+          callbacks: {
+            label: c => `${c.dataset.label || ''}: ${c.parsed.y.toFixed(2)}%`,
+            afterLabel: c => `Machine: #${c.dataset.customData[c.dataIndex] || 'N/A'}`
           }
         }
+      },
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { title: { display: true, text: 'Day of the Month' } },
+        y: { title: { display: true, text: 'Total Consumed (%)' }, ticks: { callback: v => v.toFixed(2) + '%' } }
       }
-    });
-  }
+    }
+  });
 }
 
-// --- CHART CONTROLS ---
+// --- CHART RENDERING 2: Consumption by Machine ---
+function renderMachineConsumptionChart(records) {
+  const consumptionByMachine = {};
+  records.forEach(rec => {
+    const machineNumber = rec?.['Machine_no_Operation']?.value;
+    const dailyConsumption = (parseFloat(rec['Consumed_Tank1']?.value) || 0) + (parseFloat(rec['Consumed_Tank2']?.value) || 0);
+    if (machineNumber && dailyConsumption > 0) {
+      consumptionByMachine[machineNumber] = (consumptionByMachine[machineNumber] || 0) + dailyConsumption;
+    }
+  });
+
+  const sortedMachineNumbers = Object.keys(consumptionByMachine).sort((a, b) => a - b);
+  const ctx = document.getElementById('machineConsumptionChart').getContext('2d');
+  let chartConfig;
+
+  if (machineChartViewMode === 'summary') {
+    const colors = generateHslaColors(sortedMachineNumbers.length);
+    chartConfig = {
+      type: machineChartType,
+      data: {
+        labels: ['Total Monthly Consumption'],
+        datasets: sortedMachineNumbers.map((key, index) => ({
+          label: `Machine #${key}`, data: [consumptionByMachine[key]],
+          backgroundColor: colors[index], borderColor: colors[index], fill: true,
+        }))
+      },
+      options: {
+        plugins: { title: { display: true, text: 'Summary of Consumption by Machine' } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } } }
+      }
+    };
+  } else { // Detail mode
+    chartConfig = {
+      type: machineChartType,
+      data: {
+        labels: sortedMachineNumbers.map(key => `Machine #${key}`),
+        datasets: [{
+          label: 'Total Monthly Consumption (%)', data: sortedMachineNumbers.map(key => consumptionByMachine[key]),
+          backgroundColor: 'rgba(239, 68, 68, 0.85)', borderColor: 'rgba(239, 68, 68, 1)',
+        }]
+      },
+      options: {
+        plugins: { title: { display: true, text: 'Total Consumption by Machine' }, legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Machine Number' } },
+          y: { beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } }
+        }
+      }
+    };
+  }
+  
+  chartConfig.options.responsive = true;
+  chartConfig.options.maintainAspectRatio = false;
+  chartConfig.options.plugins.tooltip = { callbacks: { label: c => `${c.dataset.label || 'Consumption'}: ${c.parsed.y.toFixed(2)}%` } };
+  
+  if (machineChart) machineChart.destroy();
+  machineChart = new Chart(ctx, chartConfig);
+}
+
+// --- CHART RENDERING 3: Consumption by Furnace ---
+function renderFurnaceConsumptionChart(records) {
+    const consumptionByFurnace = {};
+    records.forEach(rec => {
+        const furnaceId = rec?.['Furnace_On']?.value;
+        const dailyConsumption = (parseFloat(rec['Consumed_Tank1']?.value) || 0) + (parseFloat(rec['Consumed_Tank2']?.value) || 0);
+        if (furnaceId && dailyConsumption > 0) {
+            consumptionByFurnace[furnaceId] = (consumptionByFurnace[furnaceId] || 0) + dailyConsumption;
+        }
+    });
+
+    const sortedFurnaceIds = Object.keys(consumptionByFurnace).sort();
+    const ctx = document.getElementById('furnaceConsumptionChart').getContext('2d');
+    let chartConfig;
+
+    if (furnaceChartViewMode === 'summary') {
+        const colors = generateHslaColors(sortedFurnaceIds.length);
+        chartConfig = {
+            type: furnaceChartType,
+            data: {
+                labels: ['Total Monthly Consumption'],
+                datasets: sortedFurnaceIds.map((key, index) => ({
+                    label: `Furnace ${key}`, data: [consumptionByFurnace[key]],
+                    backgroundColor: colors[index], borderColor: colors[index], fill: true,
+                }))
+            },
+            options: {
+                plugins: { title: { display: true, text: 'Summary of Consumption by Furnace' } },
+                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } } }
+            }
+        };
+    } else { // Detail mode
+        chartConfig = {
+            type: furnaceChartType,
+            data: {
+                labels: sortedFurnaceIds.map(key => `Furnace ${key}`),
+                datasets: [{
+                    label: 'Total Monthly Consumption (%)', data: sortedFurnaceIds.map(key => consumptionByFurnace[key]),
+                    backgroundColor: 'rgba(16, 185, 129, 0.85)', borderColor: 'rgba(16, 185, 129, 1)',
+                }]
+            },
+            options: {
+                plugins: { title: { display: true, text: 'Total Consumption by Furnace' }, legend: { display: false } },
+                scales: {
+                    x: { title: { display: true, text: 'Furnace' } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } }
+                }
+            }
+        };
+    }
+
+    chartConfig.options.responsive = true;
+    chartConfig.options.maintainAspectRatio = false;
+    chartConfig.options.plugins.tooltip = { callbacks: { label: c => `${c.dataset.label || 'Consumption'}: ${c.parsed.y.toFixed(2)}%` } };
+
+    if (furnaceChart) furnaceChart.destroy();
+    furnaceChart = new Chart(ctx, chartConfig);
+}
+
+
+// --- UI CONTROLS SETUP ---
 function setupChartControls() {
   const chartTypeSelect = document.getElementById('chart-type');
-  const showConsumption = document.getElementById('show-consumption');
-  const showRuntime = document.getElementById('show-runtime');
-
-  if (!chartTypeSelect || !showConsumption || !showRuntime) return;
-
-  const chartTypeClone = chartTypeSelect.cloneNode(true);
-  chartTypeSelect.parentNode.replaceChild(chartTypeClone, chartTypeSelect);
-
-  const showConsumptionClone = showConsumption.cloneNode(true);
-  showConsumption.parentNode.replaceChild(showConsumptionClone, showConsumption);
-
-  const showRuntimeClone = showRuntime.cloneNode(true);
-  showRuntime.parentNode.replaceChild(showRuntimeClone, showRuntime);
-
-  chartTypeClone.addEventListener('change', () => {
+  const showTotalConsumption = document.getElementById('show-total-consumption');
+  if (!chartTypeSelect || !showTotalConsumption) return;
+  
+  chartTypeSelect.addEventListener('change', () => {
     if (oilChart) {
-      oilChart.config.type = chartTypeClone.value;
+      oilChart.config.type = chartTypeSelect.value;
       oilChart.update();
     }
+  });
+  showTotalConsumption.addEventListener('change', () => {
+    if (oilChart) {
+      oilChart.data.datasets[0].hidden = !showTotalConsumption.checked;
+      oilChart.update();
+    }
+  });
+}
+
+function setupChartViewControls() {
+  const chartSelect = document.getElementById('chart-view-select');
+  const dailyChartSection = document.getElementById('daily-chart-section');
+  const machineChartSection = document.getElementById('machine-chart-section');
+  const furnaceChartSection = document.getElementById('furnace-chart-section');
+  const dailyControls = document.getElementById('daily-chart-controls');
+  
+  // Machine chart controls
+  const machineSummaryBtn = document.getElementById('show-machine-summary-btn');
+  const machineChartTypeSelect = document.getElementById('machine-chart-type');
+  
+  // Furnace chart controls
+  const furnaceSummaryBtn = document.getElementById('show-furnace-summary-btn');
+  const furnaceChartTypeSelect = document.getElementById('furnace-chart-type');
+  
+  if (!chartSelect || !dailyChartSection || !machineChartSection || !furnaceChartSection || !dailyControls || !machineSummaryBtn || !machineChartTypeSelect || !furnaceSummaryBtn || !furnaceChartTypeSelect) return;
+
+  const updateChartView = (view) => {
+    dailyChartSection.classList.add('hidden');
+    machineChartSection.classList.add('hidden');
+    furnaceChartSection.classList.add('hidden');
+    dailyControls.style.display = 'none';
+
+    const filteredRecords = filterRecordsByCategory(allRecords, getCurrentCategory());
+
+    if (view === 'daily') {
+      dailyChartSection.classList.remove('hidden');
+      dailyControls.style.display = 'flex';
+    } else if (view === 'machine') {
+      machineChartSection.classList.remove('hidden');
+      machineChartViewMode = 'detail';
+      machineChartType = 'bar';
+      machineSummaryBtn.textContent = 'Show Summary';
+      machineChartTypeSelect.value = 'bar';
+      renderMachineConsumptionChart(filteredRecords);
+    } else if (view === 'furnace') {
+      furnaceChartSection.classList.remove('hidden');
+      furnaceChartViewMode = 'detail';
+      furnaceChartType = 'bar';
+      furnaceSummaryBtn.textContent = 'Show Summary';
+      furnaceChartTypeSelect.value = 'bar';
+      renderFurnaceConsumptionChart(filteredRecords);
+    }
+    chartSelect.value = view;
+  };
+
+  chartSelect.addEventListener('change', (e) => updateChartView(e.target.value));
+
+  // Machine chart listeners
+  machineSummaryBtn.addEventListener('click', () => {
+    machineChartViewMode = (machineChartViewMode === 'detail') ? 'summary' : 'detail';
+    machineSummaryBtn.textContent = (machineChartViewMode === 'detail') ? 'Show Summary' : 'Show Detail View';
+    renderMachineConsumptionChart(filterRecordsByCategory(allRecords, getCurrentCategory()));
+  });
+  machineChartTypeSelect.addEventListener('change', (e) => {
+    machineChartType = e.target.value;
+    renderMachineConsumptionChart(filterRecordsByCategory(allRecords, getCurrentCategory()));
   });
 
-  showConsumptionClone.addEventListener('change', () => {
-    if (oilChart && oilChart.data.datasets[0]) {
-      oilChart.data.datasets[0].hidden = !showConsumptionClone.checked;
-      oilChart.update();
-    }
+  // Furnace chart listeners
+  furnaceSummaryBtn.addEventListener('click', () => {
+    furnaceChartViewMode = (furnaceChartViewMode === 'detail') ? 'summary' : 'detail';
+    furnaceSummaryBtn.textContent = (furnaceChartViewMode === 'detail') ? 'Show Summary' : 'Show Detail View';
+    renderFurnaceConsumptionChart(filterRecordsByCategory(allRecords, getCurrentCategory()));
+  });
+  furnaceChartTypeSelect.addEventListener('change', (e) => {
+    furnaceChartType = e.target.value;
+    renderFurnaceConsumptionChart(filterRecordsByCategory(allRecords, getCurrentCategory()));
   });
 
-  showRuntimeClone.addEventListener('change', () => {
-    if (oilChart && oilChart.data.datasets[1]) {
-      oilChart.data.datasets[1].hidden = !showRuntimeClone.checked;
-      oilChart.update();
-    }
-  });
+  updateChartView('daily');
 }
 
 // --- MAIN INITIALIZATION ---
@@ -303,70 +416,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
   const currentYear = currentDate.getFullYear().toString();
 
-  // --- Auto-populate year-select with years from 2022 to current year + 1 ---
   if (yearSelect) {
     yearSelect.innerHTML = '';
-    const startYear = 2022;
-    const endYear = currentDate.getFullYear() + 1;
-    for (let y = endYear; y >= startYear; y--) {
+    for (let y = currentDate.getFullYear() + 1; y >= 2022; y--) {
       const option = document.createElement('option');
-      option.value = y.toString();
-      option.textContent = y.toString();
+      option.value = y.toString(); option.textContent = y.toString();
       yearSelect.appendChild(option);
     }
     yearSelect.value = currentYear;
   }
+  if (monthSelect) monthSelect.value = currentMonth;
 
-  // --- Set month-select to current month ---
-  if (monthSelect) {
-    monthSelect.value = currentMonth;
-  }
+  const fetchDataAndRender = async () => {
+    const m = monthSelect.value, y = yearSelect.value;
+    const d = new Date(y, m, 0).getDate();
+    const category = getCurrentCategory();
+    const config = CONFIG_MAP[category] || {};
+    
+    allRecords = await fetchKintoneAllData(m, y);
+    const filteredRecords = filterRecordsByCategory(allRecords, category);
+    
+    renderTable(allRecords, d, y, m, config);
+    renderStats(filteredRecords);
+    renderChart(filteredRecords, d, y, m);
+    renderMachineConsumptionChart(filteredRecords);
+    renderFurnaceConsumptionChart(filteredRecords);
+  };
 
-  const selectedMonth = monthSelect ? monthSelect.value : currentMonth;
-  const selectedYear = yearSelect ? yearSelect.value : currentYear;
-  const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+  monthSelect.addEventListener('change', fetchDataAndRender);
+  yearSelect.addEventListener('change', fetchDataAndRender);
 
-  const currentCategory = getCurrentCategory();
-  const config = CONFIG_MAP[currentCategory] || CONFIG_MAP[Object.keys(CONFIG_MAP)[0]];
-
-  allRecords = await fetchKintoneAllData(selectedMonth, selectedYear);
-
-  renderTable(allRecords, daysInMonth, selectedYear, selectedMonth, config);
-  const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
-  renderStats(filteredRecords, config, daysInMonth, selectedMonth, selectedYear);
-  renderChart(filteredRecords, daysInMonth, selectedYear, selectedMonth, config);
   setupChartControls();
+  setupChartViewControls();
 
-  if (monthSelect && yearSelect) {
-    const reload = async () => {
-      const m = monthSelect.value;
-      const y = yearSelect.value;
-      const d = new Date(y, m, 0).getDate();
-      allRecords = await fetchKintoneAllData(m, y);
-      renderTable(allRecords, d, y, m, config);
-      const filteredRecords = filterRecordsByCategory(allRecords, currentCategory);
-      renderStats(filteredRecords, config, d, m, y);
-      renderChart(filteredRecords, d, y, m, config);
-    };
-    monthSelect.addEventListener('change', reload);
-    yearSelect.addEventListener('change', reload);
-  }
+  await fetchDataAndRender(); // Initial load
 
-  // Toggle mobile menu visibility
   const menuBtn = document.getElementById('menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
-
-  menuBtn.addEventListener('click', () => {
-    mobileMenu.classList.toggle('hidden');
-  });
-
-  // Mobile Oil submenu toggle
+  menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
   const oilToggle = document.getElementById('mobile-oil-toggle');
   const oilSubmenu = document.getElementById('mobile-oil-submenu');
-  const oilArrow = document.getElementById('mobile-arrow');
-
-  oilToggle.addEventListener('click', () => {
-    oilSubmenu.classList.toggle('hidden');
-    oilArrow.classList.toggle('rotate-180');
-  });
+  oilToggle.addEventListener('click', () => oilSubmenu.classList.toggle('hidden'));
 });

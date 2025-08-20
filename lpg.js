@@ -25,26 +25,19 @@ const CONFIG_MAP = {
       { label: '', key: '' },
       { label: 'Total(%): TANK 1 DELIVERY', key: 'TDT_Tank1', category: 'LPG Monitoring' },
       { label: 'Total(%): TANK 2 DELIVERY', key: 'TDT_Tank2', category: 'LPG Monitoring' }
-    ],
-    chart: {},
-    deliveryKey: 'Delivery_LPG'
+    ]
   },
   'Ingot Used': {
     table: [
       { label: 'Inggot Used (pcs)', key: 'Ingot_Used' },
       { label: 'Ingot Bundle', key: 'Ingot_Bundle' },
-    ],
+    ]
   }
 };
 
 // Global variables
 let allRecords = [];
-let oilChart, machineChart, furnaceChart;
-let machineChartViewMode = 'detail';
-let machineChartType = 'bar';
-let furnaceChartViewMode = 'detail';
-let furnaceChartType = 'bar';
-
+let activityChart, utilizationChart;
 
 // --- UTILITY FUNCTIONS ---
 async function fetchKintoneAllData(month, year) {
@@ -57,7 +50,7 @@ async function fetchKintoneAllData(month, year) {
 
 function getCurrentCategory() {
   const categoryHeader = document.getElementById('category-title');
-  return categoryHeader ? categoryHeader.textContent.trim() : Object.keys(CONFIG_MAP)[0];
+  return categoryHeader ? categoryHeader.textContent.trim() : 'LPG Monitoring';
 }
 
 function getCurrentPlant() {
@@ -71,16 +64,6 @@ function filterRecords(records, category, plant) {
     r['Plant_Location']?.value === plant
   );
 }
-
-function generateHslaColors(amount) {
-  const colors = [];
-  for (let i = 0; i < amount; i++) {
-    const hue = (i * (360 / (amount * 1.618))) % 360;
-    colors.push(`hsla(${hue}, 70%, 50%, 0.85)`);
-  }
-  return colors;
-}
-
 
 // --- TABLE RENDERING ---
 function renderTable(allRecords, daysInMonth, selectedYear, selectedMonth, config) {
@@ -145,176 +128,127 @@ function renderStats(records) {
   });
   const avgConsumption = daysWithRecords > 0 ? totalConsumedPercent / daysWithRecords : 0;
   
-  const totalStr = totalConsumedPercent.toFixed(2) + '%';
-  const avgStr = avgConsumption.toFixed(2) + '%';
-  
-  document.getElementById('total-consumed').textContent = totalStr;
-  document.getElementById('avg-consumption').textContent = avgStr;
-  document.getElementById('total-consumed-machine').textContent = totalStr;
-  document.getElementById('avg-consumption-machine').textContent = avgStr;
-  document.getElementById('total-consumed-furnace').textContent = totalStr;
-  document.getElementById('avg-consumption-furnace').textContent = avgStr;
+  document.getElementById('total-consumed').textContent = totalConsumedPercent.toFixed(2) + '%';
+  document.getElementById('avg-consumption').textContent = avgConsumption.toFixed(2) + '%';
 }
 
 // --- CHART RENDERERS ---
-function renderChart(records, daysInMonth, selectedYear, selectedMonth) {
-  const labels = [], totalConsumptionData = [], machineData = [];
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateStr = `${selectedYear}-${selectedMonth}-${String(day).padStart(2, '0')}`;
-    const rec = records.find(r => r['Date_Today']?.value === dateStr);
-    labels.push(day.toString());
-    totalConsumptionData.push((parseFloat(rec?.['Consumed_Tank1']?.value) || 0) + (parseFloat(rec?.['Consumed_Tank2']?.value) || 0));
-    machineData.push(rec?.['Machine_no_Operation']?.value || 'N/A');
-  }
-  const ctx = document.getElementById('oilChart').getContext('2d');
-  if (oilChart) oilChart.destroy();
-  oilChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Total Consumed (%)', data: totalConsumptionData, customData: machineData,
-        backgroundColor: 'rgba(59, 130, 246, 0.85)', borderColor: 'rgba(59, 130, 246, 1)',
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        title: { display: true, text: 'Total Daily LPG Consumption' },
-        tooltip: {
-          callbacks: {
-            label: c => `${c.dataset.label || ''}: ${c.parsed.y.toFixed(2)}%`,
-            afterLabel: c => `Machine: #${c.dataset.customData[c.dataIndex] || 'N/A'}`
-          }
-        }
-      },
-      interaction: { mode: 'index', intersect: false },
-      scales: {
-        x: { title: { display: true, text: 'Day of the Month' } },
-        y: { title: { display: true, text: 'Total Consumed (%)' }, ticks: { callback: v => v.toFixed(2) + '%' } }
-      }
+function renderActivityChart(records, daysInMonth, selectedYear, selectedMonth) {
+    const labels = [], consumptionData = [], machineCountData = [];
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        labels.push(day.toString());
+        const dateStr = `${selectedYear}-${selectedMonth}-${String(day).padStart(2, '0')}`;
+        const rec = records.find(r => r['Date_Today']?.value === dateStr);
+        
+        const consumption = (parseFloat(rec?.['Consumed_Tank1']?.value) || 0) + (parseFloat(rec?.['Consumed_Tank2']?.value) || 0);
+        consumptionData.push(consumption);
+
+        const machineCount = parseFloat(rec?.['Machine_no_Operation']?.value) || 0;
+        machineCountData.push(machineCount);
     }
-  });
-}
 
-function renderMachineConsumptionChart(records) {
-  const consumptionByMachine = {};
-  records.forEach(rec => {
-    const machineNumber = rec?.['Machine_no_Operation']?.value;
-    const dailyConsumption = (parseFloat(rec['Consumed_Tank1']?.value) || 0) + (parseFloat(rec['Consumed_Tank2']?.value) || 0);
-    if (machineNumber && dailyConsumption > 0) {
-      consumptionByMachine[machineNumber] = (consumptionByMachine[machineNumber] || 0) + dailyConsumption;
-    }
-  });
-
-  const sortedMachineNumbers = Object.keys(consumptionByMachine).sort((a, b) => a - b);
-  const ctx = document.getElementById('machineConsumptionChart').getContext('2d');
-  let chartConfig;
-
-  if (machineChartViewMode === 'summary') {
-    const colors = generateHslaColors(sortedMachineNumbers.length);
-    chartConfig = { type: machineChartType, data: { labels: ['Total Monthly Consumption'], datasets: sortedMachineNumbers.map((key, index) => ({ label: `Machine #${key}`, data: [consumptionByMachine[key]], backgroundColor: colors[index], borderColor: colors[index], fill: true, })) }, options: { plugins: { title: { display: true, text: 'Summary of Consumption by Machine' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } } } } };
-  } else {
-    chartConfig = { type: machineChartType, data: { labels: sortedMachineNumbers.map(key => `Machine #${key}`), datasets: [{ label: 'Total Monthly Consumption (%)', data: sortedMachineNumbers.map(key => consumptionByMachine[key]), backgroundColor: 'rgba(239, 68, 68, 0.85)', borderColor: 'rgba(239, 68, 68, 1)', }] }, options: { plugins: { title: { display: true, text: 'Total Consumption by Machine' }, legend: { display: false } }, scales: { x: { title: { display: true, text: 'Machine Number' } }, y: { beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } } } } };
-  }
-  
-  chartConfig.options.responsive = true;
-  chartConfig.options.maintainAspectRatio = false;
-  chartConfig.options.plugins.tooltip = { callbacks: { label: c => `${c.dataset.label || 'Consumption'}: ${c.parsed.y.toFixed(2)}%` } };
-  
-  if (machineChart) machineChart.destroy();
-  machineChart = new Chart(ctx, chartConfig);
-}
-
-function renderFurnaceConsumptionChart(records) {
-    const consumptionByFurnace = {};
-    records.forEach(rec => {
-        const furnaceId = rec?.['Furnace_On']?.value;
-        const dailyConsumption = (parseFloat(rec['Consumed_Tank1']?.value) || 0) + (parseFloat(rec['Consumed_Tank2']?.value) || 0);
-        if (furnaceId && dailyConsumption > 0) {
-            consumptionByFurnace[furnaceId] = (consumptionByFurnace[furnaceId] || 0) + dailyConsumption;
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    if (activityChart) activityChart.destroy();
+    
+    activityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+              {
+                    label: 'LPG Consumed (%)',
+                    data: consumptionData,
+                    borderColor: 'rgba(59, 130, 246, 1)', // Blue
+                    backgroundColor: 'rgba(59, 130, 246, 1)',
+                    type: 'line',
+                    yAxisID: 'y',
+                    tension: 0.3
+                },
+                {
+                    label: 'Active Machines',
+                    data: machineCountData,
+                    backgroundColor: 'rgba(209, 213, 219, 0.8)', // Gray
+                    yAxisID: 'y1',
+                }
+                
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                x: { title: { display: true, text: 'Day of the Month' } },
+                y: {
+                    type: 'linear', display: true, position: 'left',
+                    title: { display: true, text: 'LPG Consumed (%)' },
+                    grid: { drawOnChartArea: false } 
+                },
+                y1: {
+                    type: 'linear', display: true, position: 'right',
+                    title: { display: true, text: 'Active Machines (Count)' }
+                }
+            }
         }
     });
+}
 
-    const sortedFurnaceIds = Object.keys(consumptionByFurnace).sort();
-    const ctx = document.getElementById('furnaceConsumptionChart').getContext('2d');
-    let chartConfig;
+function renderUtilizationChart(records, daysInMonth, selectedYear, selectedMonth) {
+    const labels = [], activePercentData = [], idlePercentData = [];
 
-    if (furnaceChartViewMode === 'summary') {
-        const colors = generateHslaColors(sortedFurnaceIds.length);
-        chartConfig = { type: furnaceChartType, data: { labels: ['Total Monthly Consumption'], datasets: sortedFurnaceIds.map((key, index) => ({ label: `Furnace ${key}`, data: [consumptionByFurnace[key]], backgroundColor: colors[index], borderColor: colors[index], fill: true, })) }, options: { plugins: { title: { display: true, text: 'Summary of Consumption by Furnace' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } } } } };
-    } else {
-        chartConfig = { type: furnaceChartType, data: { labels: sortedFurnaceIds.map(key => `Furnace ${key}`), datasets: [{ label: 'Total Monthly Consumption (%)', data: sortedFurnaceIds.map(key => consumptionByFurnace[key]), backgroundColor: 'rgba(16, 185, 129, 0.85)', borderColor: 'rgba(16, 185, 129, 1)', }] }, options: { plugins: { title: { display: true, text: 'Total Consumption by Furnace' }, legend: { display: false } }, scales: { x: { title: { display: true, text: 'Furnace' } }, y: { beginAtZero: true, title: { display: true, text: 'Total Consumed (%)' } } } } };
+    for (let day = 1; day <= daysInMonth; day++) {
+        labels.push(day.toString());
+        const dateStr = `${selectedYear}-${selectedMonth}-${String(day).padStart(2, '0')}`;
+        const rec = records.find(r => r['Date_Today']?.value === dateStr);
+
+        const activeCount = parseFloat(rec?.['Machine_no_Operation']?.value) || 0;
+        const idleCount = parseFloat(rec?.['Furnace_On']?.value) || 0;
+        const total = activeCount + idleCount;
+
+        activePercentData.push(total > 0 ? (activeCount / total) * 100 : 0);
+        idlePercentData.push(total > 0 ? (idleCount / total) * 100 : 0);
     }
 
-    chartConfig.options.responsive = true;
-    chartConfig.options.maintainAspectRatio = false;
-    chartConfig.options.plugins.tooltip = { callbacks: { label: c => `${c.dataset.label || 'Consumption'}: ${c.parsed.y.toFixed(2)}%` } };
+    const ctx = document.getElementById('utilizationChart').getContext('2d');
+    if (utilizationChart) utilizationChart.destroy();
 
-    if (furnaceChart) furnaceChart.destroy();
-    furnaceChart = new Chart(ctx, chartConfig);
+    utilizationChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Active Machines (%)',
+                    data: activePercentData,
+                    backgroundColor: 'rgba(16, 185, 129, 0.5)', // Green
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    fill: true
+                },
+                {
+                    label: 'Idle Machines (%)',
+                    data: idlePercentData,
+                    backgroundColor: 'rgba(209, 213, 219, 0.5)', // Gray
+                    borderColor: 'rgba(156, 163, 175, 1)',
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { tooltip: { mode: 'index' } },
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                x: { title: { display: true, text: 'Day of the Month' } },
+                y: {
+                    stacked: true,
+                    max: 100,
+                    title: { display: true, text: 'Machine Utilization (%)' }
+                }
+            }
+        }
+    });
 }
 
-
-// --- UI CONTROLS SETUP ---
-function setupChartControls() {
-  const chartTypeSelect = document.getElementById('chart-type');
-  const showTotalConsumption = document.getElementById('show-total-consumption');
-  if (!chartTypeSelect || !showTotalConsumption) return;
-  
-  chartTypeSelect.addEventListener('change', () => { if (oilChart) { oilChart.config.type = chartTypeSelect.value; oilChart.update(); } });
-  showTotalConsumption.addEventListener('change', () => { if (oilChart) { oilChart.data.datasets[0].hidden = !showTotalConsumption.checked; oilChart.update(); } });
-}
-
-function setupChartViewControls() {
-  const chartSelect = document.getElementById('chart-view-select');
-  const dailyChartSection = document.getElementById('daily-chart-section');
-  const machineChartSection = document.getElementById('machine-chart-section');
-  const furnaceChartSection = document.getElementById('furnace-chart-section');
-  const dailyControls = document.getElementById('daily-chart-controls');
-  
-  const machineSummaryBtn = document.getElementById('show-machine-summary-btn');
-  const machineChartTypeSelect = document.getElementById('machine-chart-type');
-  const furnaceSummaryBtn = document.getElementById('show-furnace-summary-btn');
-  const furnaceChartTypeSelect = document.getElementById('furnace-chart-type');
-  
-  if (!chartSelect || !dailyChartSection || !machineChartSection || !furnaceChartSection || !dailyControls || !machineSummaryBtn || !machineChartTypeSelect || !furnaceSummaryBtn || !furnaceChartTypeSelect) return;
-
-  const updateChartView = (view) => {
-    dailyChartSection.classList.add('hidden');
-    machineChartSection.classList.add('hidden');
-    furnaceChartSection.classList.add('hidden');
-    dailyControls.style.display = 'none';
-
-    const filteredRecords = filterRecords(allRecords, getCurrentCategory(), getCurrentPlant());
-
-    if (view === 'daily') {
-      dailyChartSection.classList.remove('hidden');
-      dailyControls.style.display = 'flex';
-    } else if (view === 'machine') {
-      machineChartSection.classList.remove('hidden');
-      machineChartViewMode = 'detail'; machineChartType = 'bar';
-      machineSummaryBtn.textContent = 'Show Summary';
-      machineChartTypeSelect.value = 'bar';
-      renderMachineConsumptionChart(filteredRecords);
-    } else if (view === 'furnace') {
-      furnaceChartSection.classList.remove('hidden');
-      furnaceChartViewMode = 'detail'; furnaceChartType = 'bar';
-      furnaceSummaryBtn.textContent = 'Show Summary';
-      furnaceChartTypeSelect.value = 'bar';
-      renderFurnaceConsumptionChart(filteredRecords);
-    }
-    chartSelect.value = view;
-  };
-
-  chartSelect.addEventListener('change', (e) => updateChartView(e.target.value));
-  machineSummaryBtn.addEventListener('click', () => { machineChartViewMode = (machineChartViewMode === 'detail') ? 'summary' : 'detail'; machineSummaryBtn.textContent = (machineChartViewMode === 'detail') ? 'Show Summary' : 'Show Detail View'; renderMachineConsumptionChart(filterRecords(allRecords, getCurrentCategory(), getCurrentPlant())); });
-  machineChartTypeSelect.addEventListener('change', (e) => { machineChartType = e.target.value; renderMachineConsumptionChart(filterRecords(allRecords, getCurrentCategory(), getCurrentPlant())); });
-  furnaceSummaryBtn.addEventListener('click', () => { furnaceChartViewMode = (furnaceChartViewMode === 'detail') ? 'summary' : 'detail'; furnaceSummaryBtn.textContent = (furnaceChartViewMode === 'detail') ? 'Show Summary' : 'Show Detail View'; renderFurnaceConsumptionChart(filterRecords(allRecords, getCurrentCategory(), getCurrentPlant())); });
-  furnaceChartTypeSelect.addEventListener('change', (e) => { furnaceChartType = e.target.value; renderFurnaceConsumptionChart(filterRecords(allRecords, getCurrentCategory(), getCurrentPlant())); });
-
-  updateChartView('daily');
-}
 
 // --- MAIN INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -345,19 +279,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     allRecords = await fetchKintoneAllData(m, y);
     const filteredRecords = filterRecords(allRecords, category, p);
     
-    renderTable(allRecords, d, y, m, config); // Pass allRecords to table renderer
+    // Pass allRecords to table renderer so it can access multiple categories
+    renderTable(allRecords, d, y, m, config);
+
+    // Pass filteredRecords to stats and charts
     renderStats(filteredRecords);
-    renderChart(filteredRecords, d, y, m);
-    renderMachineConsumptionChart(filteredRecords);
-    renderFurnaceConsumptionChart(filteredRecords);
+    renderActivityChart(filteredRecords, d, y, m);
+    renderUtilizationChart(filteredRecords, d, y, m);
   };
 
   monthSelect.addEventListener('change', fetchDataAndRender);
   yearSelect.addEventListener('change', fetchDataAndRender);
   plantSelect.addEventListener('change', fetchDataAndRender);
-
-  setupChartControls();
-  setupChartViewControls();
 
   await fetchDataAndRender(); // Initial load
 

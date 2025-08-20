@@ -110,104 +110,28 @@
            </table>
       </div>
       
-      <div class="flex flex-wrap items-center gap-4 mt-8 mb-6 p-4 bg-gray-50 rounded-lg border">
-        <div class="flex items-center gap-2">
-          <label for="chart-view-select" class="text-sm font-medium">View:</label>
-          <select id="chart-view-select" class="border rounded p-2 text-sm bg-white">
-            <option value="daily" selected>Daily Consumption</option>
-            <option value="machine">Consumption by Machine</option>
-            <option value="furnace">Consumption by Furnace</option>
-          </select>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 text-center">
+        <div class="bg-blue-50 p-3 rounded border">
+          <div class="text-2xl font-bold text-blue-600" id="total-consumed"></div>
+          <div class="text-sm text-gray-600">Total Consumed (%)</div>
         </div>
-        <div id="daily-chart-controls" class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Chart Type:</label>
-              <select id="chart-type" class="border rounded p-2 text-sm bg-white">
-                <option value="line">Line Chart</option><option value="bar">Bar Chart</option>
-              </select>
-            </div>
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Show:</label>
-              <label class="flex items-center gap-1">
-                <input type="checkbox" id="show-total-consumption" checked>
-                <span class="text-sm">Total Consumption</span>
-              </label>
-            </div>
+        <div class="bg-green-50 p-3 rounded border">
+          <div class="text-2xl font-bold text-green-600" id="avg-consumption"></div>
+          <div class="text-sm text-gray-600">Avg Daily Consumption (%)</div>
         </div>
       </div>
 
-      <div id="daily-chart-section">
+      <div class="mt-4">
         <div class="bg-white p-6 rounded shadow-md border">
-          <h2 class="text-lg font-bold mb-4">Daily Consumption Analysis</h2>
-          <div class="relative h-96"><canvas id="oilChart"></canvas></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 text-center">
-            <div class="bg-blue-50 p-3 rounded">
-              <div class="text-2xl font-bold text-blue-600" id="total-consumed"></div>
-              <div class="text-sm text-gray-600">Total Consumed (%)</div>
-            </div>
-            <div class="bg-green-50 p-3 rounded">
-              <div class="text-2xl font-bold text-green-600" id="avg-consumption"></div>
-              <div class="text-sm text-gray-600">Avg Daily Consumption (%)</div>
-            </div>
-          </div>
+          <h2 class="text-lg font-bold mb-4">Daily Consumption vs. Active Machines</h2>
+          <div class="relative h-96"><canvas id="activityChart"></canvas></div>
         </div>
       </div>
 
-      <div id="machine-chart-section" class="hidden">
+      <div class="mt-8">
         <div class="bg-white p-6 rounded shadow-md border">
-          <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-              <h2 class="text-lg font-bold">Monthly Consumption by Machine</h2>
-              <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium">Chart Type:</label>
-                    <select id="machine-chart-type" class="border rounded p-2 text-sm bg-white">
-                        <option value="bar">Bar Chart</option>
-                        <option value="line">Line Chart</option>
-                    </select>
-                </div>
-                <button id="show-machine-summary-btn" class="bg-blue-600 text-white px-3 py-2 rounded text-sm font-semibold hover:bg-blue-700">Show Summary</button>
-              </div>
-          </div>
-          <div class="relative h-96"><canvas id="machineConsumptionChart"></canvas></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 text-center">
-            <div class="bg-blue-50 p-3 rounded">
-              <div class="text-2xl font-bold text-blue-600" id="total-consumed-machine"></div>
-              <div class="text-sm text-gray-600">Total Consumed (%)</div>
-            </div>
-            <div class="bg-green-50 p-3 rounded">
-              <div class="text-2xl font-bold text-green-600" id="avg-consumption-machine"></div>
-              <div class="text-sm text-gray-600">Avg Daily Consumption (%)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="furnace-chart-section" class="hidden">
-        <div class="bg-white p-6 rounded shadow-md border">
-          <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-            <h2 class="text-lg font-bold">Monthly Consumption by Furnace</h2>
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium">Chart Type:</label>
-                    <select id="furnace-chart-type" class="border rounded p-2 text-sm bg-white">
-                        <option value="bar">Bar Chart</option>
-                        <option value="line">Line Chart</option>
-                    </select>
-                </div>
-                <button id="show-furnace-summary-btn" class="bg-blue-600 text-white px-3 py-2 rounded text-sm font-semibold hover:bg-blue-700">Show Summary</button>
-            </div>
-          </div>
-          <div class="relative h-96"><canvas id="furnaceConsumptionChart"></canvas></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 text-center">
-            <div class="bg-blue-50 p-3 rounded">
-              <div class="text-2xl font-bold text-blue-600" id="total-consumed-furnace"></div>
-              <div class="text-sm text-gray-600">Total Consumed (%)</div>
-            </div>
-            <div class="bg-green-50 p-3 rounded">
-              <div class="text-2xl font-bold text-green-600" id="avg-consumption-furnace"></div>
-              <div class="text-sm text-gray-600">Avg Daily Consumption (%)</div>
-            </div>
-          </div>
+          <h2 class="text-lg font-bold mb-4">Daily Machine Utilization</h2>
+          <div class="relative h-96"><canvas id="utilizationChart"></canvas></div>
         </div>
       </div>
 

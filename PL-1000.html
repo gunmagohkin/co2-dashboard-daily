@@ -10,23 +10,17 @@
 </head>
 <body class="bg-gray-100">
 
-<!-- NAVBAR -->
 <nav class="bg-white shadow">
   <div class="max-w-full mx-auto px-4">
     <div class="flex justify-between items-center h-14">
-      <!-- Logo + Title -->
       <div class="flex items-center space-x-3">
-        <!-- Logo -->
         <a href="index.html">
           <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 w-auto">
         </a>
-        <!-- Title -->
         <div class="text-lg font-bold">Daily Monitoring Dashboard</div>
       </div>
 
-      <!-- Desktop menu -->
       <div class="hidden lg:flex space-x-6">
-        <!-- Oil Usage Dropdown -->
         <div class="relative group">
           <a href="#" class="hover:text-blue-500 font-semibold flex items-center">
             Oil Usage in Operation
@@ -34,7 +28,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </a>
-          <!-- Dropdown menu -->
           <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
             <div class="py-1">
               <a href="tellus46.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 46</a>
@@ -46,11 +39,9 @@
           </div>
         </div>
 
-        <!-- Other menu items -->
         <a href="lpg.html" class="hover:text-blue-500 font-semibold">LPG Monitoring</a>
       </div>
 
-      <!-- Mobile menu button -->
       <div class="lg:hidden">
         <button id="menu-btn" class="focus:outline-none">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -61,7 +52,6 @@
     </div>
   </div>
 
-  <!-- Mobile menu -->
   <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4">
     <div class="mb-2">
       <button id="mobile-oil-toggle" class="block py-1 hover:text-blue-500 font-semibold w-full text-left flex items-center justify-between">
@@ -79,12 +69,10 @@
       </div>
     </div>
 
-    <!-- Other mobile menu items -->
     <a href="lpg.html" class="block py-1 hover:text-blue-500">LPG Monitoring</a>
   </div>
 </nav>
 
-<!-- MAIN CONTENT -->
 <div class="p-4">
   <div class="max-w-full overflow-x-auto">
     <div class="bg-white p-4 rounded shadow-md">
@@ -93,7 +81,6 @@
           <h1 id="category-title" class="text-lg font-bold">PL-1000</h1>
           <h1 class="text-lg font-bold">Plunger Oil Monitoring</h1>
         </div>
-        <!-- Month/Year filters -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
           <div class="flex gap-2">
              <select id="plant-select" class="border rounded p-1">
@@ -125,7 +112,6 @@
         </div>
       </div>
     
-      <!-- Info Section -->
       <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-8 gap-2 mb-2">
         <div>
           <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
@@ -137,42 +123,51 @@
         </div>
       </div>
 
-      <!-- SCROLLABLE TABLE -->
-      <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
-        <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
-          <thead class="sticky top-0 bg-gradient-to-r from-blue-50 to-blue-100 z-10">
-            <tr>
-              <th class="px-3 py-2 border border-gray-200 font-semibold text-gray-700 text-xs tracking-wide">Items</th>
-              <!-- JS will fill these day columns dynamically -->
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-              <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Consumed (Liters)</td>
-            </tr>
-            <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-              <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Machine Run</td>
-            </tr>
-            <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-              <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Remaining Stock (Liters)</td>
-            </tr>
-            <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-              <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Delivery (Pail)</td>
-            </tr>
-            <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-              <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Refill (Pail)</td>
-            </tr>
-            <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-              <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Pail</td>
-            </tr>
-            <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-              <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Liters</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="flex justify-end my-4">
+        <button id="timeframe-toggle-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors">
+            Switch to Weekly View
+        </button>
       </div>
+      
+      <div id="daily-table-container">
+        <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+          <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
+            <thead class="sticky top-0 bg-gradient-to-r from-blue-50 to-blue-100 z-10">
+              <tr>
+                <th class="px-3 py-2 border border-gray-200 font-semibold text-gray-700 text-xs tracking-wide">Items</th>
+                </tr>
+            </thead>
+            <tbody>
+              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Consumed (Liters)</td>
+              </tr>
+              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Machine Run</td>
+              </tr>
+              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Remaining Stock (Liters)</td>
+              </tr>
+              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Delivery (Pail)</td>
+              </tr>
+              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Refill (Pail)</td>
+              </tr>
+              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Pail</td>
+              </tr>
+              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
+                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Liters</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div id="weekly-summary-container" class="mt-8" style="display: none;">
+          </div>
 
-      <!-- Bottom Info -->
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div class="border border-gray-400 p-4 rounded bg-white">
           <h2 class="font-bold mb-2" id="initial-data-title">Initial Data</h2>
@@ -187,15 +182,12 @@
         </div>
       </div>
 
-      <!-- CHART SECTION -->
       <div class="mt-8">
         <div class="bg-white p-6 rounded shadow-md">
-          <h2 class="text-lg font-bold mb-4">PL-1000 Oil Consumption Analysis</h2>
+          <h2 id="chart-main-title" class="text-lg font-bold mb-4">PL-1000 Oil Consumption Analysis</h2>
           
-          <!-- Chart Controls -->
-          <div class="flex flex-wrap gap-4 mb-6">
-            <!-- Chart View Toggle -->
-            <div class="flex items-center gap-2">
+          <div id="chart-controls" class="flex flex-wrap gap-4 mb-6">
+            <div id="chart-view-control" class="flex items-center gap-2">
               <label class="text-sm font-medium">View:</label>
               <select id="chart-view" class="border rounded p-2 text-sm">
                 <option value="daily" selected>Daily Consumption</option>
@@ -212,49 +204,35 @@
             </div>
             
             <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Show:</label>
-              <label class="flex items-center gap-1">
-                <input type="checkbox" id="show-consumption" checked>
-                <span class="text-sm">Total Consumption</span>
-              </label>
-            </div>
-            
-            <!-- Machine Summary Toggle Button -->
-            <div class="flex items-center gap-2">
               <button id="toggle-machine-summary" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
                 Show Machine Summary
               </button>
             </div>
           </div>
 
-          <!-- Daily Chart Container -->
           <div id="daily-chart-container" class="relative mb-8">
             <canvas id="oilChart" style="height:320px;max-height:320px;width:100%;"></canvas>
           </div>
 
-          <!-- Machine Chart Container -->
           <div id="machine-chart-container" class="relative mb-8" style="display: none;">
             <canvas id="machineChart" style="height:320px;max-height:320px;width:100%;"></canvas>
           </div>
 
-          <!-- Machine Summary Table Container -->
           <div id="machine-summary-table" style="display: none;" class="mb-8">
-            <!-- Table will be populated by JavaScript -->
-          </div>
+            </div>
 
-          <!-- Chart Summary -->
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6 text-center">
             <div class="bg-blue-50 p-3 rounded">
               <div class="text-2xl font-bold text-blue-600" id="total-consumed">0.00</div>
               <div class="text-sm text-gray-600">Total Consumed (L)</div>
             </div>
-            <div class="bg-green-50 p-3 rounded">
-              <div class="text-2xl font-bold text-green-600" id="avg-consumption">0.00</div>
-              <div class="text-sm text-gray-600">Avg Consumption (L)</div>
-            </div>
             <div class="bg-purple-50 p-3 rounded">
               <div class="text-2xl font-bold text-purple-600" id="efficiency">0.00</div>
-              <div class="text-sm text-gray-600">L per Hour</div>
+              <div class="text-sm text-gray-600">Avg L per Day</div>
+            </div>
+            <div class="bg-yellow-50 p-3 rounded">
+                <div class="text-2xl font-bold text-yellow-600" id="total-deliveries"></div>
+                <div class="text-sm text-gray-600">Total Deliveries (Pails)</div>
             </div>
           </div>
         </div>
@@ -274,3 +252,6 @@
 </footer>
 
 <script src="pl-2.js"></script>
+
+</body>
+</html>

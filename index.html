@@ -1,258 +1,410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EP-220 Toggle Oil Monitoring</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
-</head>
-<body class="bg-gray-100">
-
-<nav class="bg-white shadow">
-  <div class="max-w-full mx-auto px-4">
-    <div class="flex justify-between items-center h-14">
-
-      <div class="flex items-center space-x-3">
-        <a href="index.html">
-          <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 w-auto">
-        </a>
-        <div class="text-lg font-bold">Daily Monitoring Dashboard</div>
-      </div>
-
-      <div class="hidden lg:flex space-x-6">
-        <div class="relative group">
-          <a href="#" class="hover:text-blue-500 font-semibold flex items-center">
-            Oil Usage in Operation
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </a>
-          <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-            <div class="py-1">
-              <a href="tellus46.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 46</a>
-              <a href="tellus32.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 32</a>
-              <a href="index.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">EP-220</a>
-              <a href="PL-1000.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">PL-1000</a>
-              <a href="kerosene.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Kerosene</a>
-            </div>
-          </div>
-        </div>
-
-        <a href="lpg.html" class="hover:text-blue-500 font-semibold">LPG Monitoring</a>
-      </div>
-
-      <div class="lg:hidden">
-        <button id="menu-btn" class="focus:outline-none">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4">
-    <div class="mb-2">
-      <button id="mobile-oil-toggle" class="block py-1 hover:text-blue-500 font-semibold w-full text-left flex items-center justify-between">
-        Oil Usage in Operation
-        <svg id="mobile-arrow" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      <div id="mobile-oil-submenu" class="hidden ml-4 mt-1">
-        <a href="tellus46.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 46</a>
-        <a href="tellus36.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 32</a>
-        <a href="index.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">EP-220</a>
-        <a href="PL-1000.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">PL-1000</a>
-        <a href="kerosene.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Kerosene</a>
-      </div>
-    </div>
-
-    <a href="lpg.html" class="block py-1 hover:text-blue-500">LPG Monitoring</a>
-  </div>
-</nav>
-
-<div class="p-4">
-  <div class="max-w-full overflow-x-auto">
-    <div class="bg-white p-4 rounded shadow-md">
-      <div class="flex  flex-col sm:flex-row sm:items-center sm:justify-between">
-     <div class="flex items-center gap-2 mb-4">
-          <h1 id="category-title" class="text-lg font-bold">EP-220</h1>
-          <h1 class="text-lg font-bold">Toggle Oil Monitoring</h1>
-        </div>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-          <div class="flex gap-2">
-             <select id="plant-select" class="border rounded p-1">
-              <option value="GGPC - Gunma Gohkin" selected>GGPC - Gunma Gohkin</option>
-              <option value="CDPC - Creative Diecast">CDPC - Creative Diecast</option>
-            </select>
-            <select id="month-select" class="border rounded p-1">
-              <option value="01">January</option>
-              <option value="02">February</option>
-              <option value="03">March</option>
-              <option value="04">April</option>
-              <option value="05">May</option>
-              <option value="06">June</option>
-              <option value="07">July</option>
-              <option value="08">August</option>
-              <option value="09">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-
-            <select id="year-select" class="border rounded p-1">
-            
-            </select>
-            
-          </div>
-        </div>
-      </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
+    <title>GGPC Dashboard | Log in</title>
     
-<div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-8 gap-2 mb-2">
-        <div>
-          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
-            <span>PAIL:</span><span>1</span>
-          </div>
-          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
-            <span>PAIL/Liter:</span><span>18</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="flex justify-end my-4">
-        <button id="timeframe-toggle-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors">
-            Switch to Weekly View
-        </button>
-      </div>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Tailwind Configuration -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif'],
+            },
+          },
+        },
+      }
+    </script>
 
-      <div id="daily-table-container">
-          <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
-            <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
-              <thead class="sticky top-0 bg-gradient-to-r from-blue-50 to-blue-100 z-10">
-                <tr>
-                  <th class="px-3 py-2 border border-gray-200 font-semibold text-gray-700 text-xs tracking-wide">Items</th>
-                  </tr>
-              </thead>
-              <tbody>
-                <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                  <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Consumed (Liters)</td>
-                </tr>
-                <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                  <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Machine Run</td>
-                </tr>
-                <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                  <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Remaining Stock (Liters)</td>
-                </tr>
-                <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                  <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Delivery (Pail)</td>
-                </tr>
-                <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                  <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Refill (Pail)</td>
-                </tr>
-                <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                  <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Pail</td>
-                </tr>
-                <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                  <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Liters</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-      </div>
+    <style>
+        /* Canvas for background animation */
+        #line-animation-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all other content */
+        }
+        /* Simple transition for the dropdown list */
+        .dropdown-menu {
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        }
+        /* Ensure avatar images cover the area without being distorted */
+        .avatar-image {
+            object-fit: cover;
+        }
+        /* Blinking cursor for typewriter effect */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 0.7s step-end infinite;
+        }
 
-      <div id="weekly-summary-container" class="mt-8" style="display: none;">
-          </div>
+        @keyframes blink {
+            from, to {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
 
+</head>
+<body class="bg-gray-100 font-sans">
+    
+    <canvas id="line-animation-canvas"></canvas>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <div class="border border-gray-400 p-4 rounded bg-white">
-          <h2 class="font-bold mb-2" id="initial-data-title"></h2>
-          <div>
-          <span><span class="font-semibold" id="avg-consumption-day-label"></span> <span class="font-bold" id="avg-consumption-day"></span> L</span><br>
-          <span><span class="font-semibold" id="monthly-consumption-label"></span> <span class="font-bold" id="monthly-consumption"></span> L</span>
-        </div>
-
-        </div>
-              <div class="border border-gray-400 p-4 rounded bg-white"> 
-                <b>Delivery Dates:</b><br>
-                <span id="delivery-date"></span>
-              </div>
-      </div>
-
-      <div class="mt-8">
-        <div class="bg-white p-6 rounded shadow-md">
-          <h2 id="chart-main-title" class="text-lg font-bold mb-4">EP-220 Oil Consumption Analysis</h2>
-          
-          <div id="chart-controls" class="flex flex-wrap gap-4 mb-6">
-            <div id="chart-view-control" class="flex items-center gap-2">
-              <label class="text-sm font-medium">View:</label>
-              <select id="chart-view" class="border rounded p-2 text-sm">
-                <option value="daily" selected>Daily Consumption</option>
-                <option value="machine">Consumption by Machine</option>
-              </select>
-            </div>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 md:p-12 relative">
             
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Chart Type:</label>
-              <select id="chart-type" class="border rounded p-2 text-sm">
-                <option value="line" selected>Line Chart</option>
-                <option value="bar">Bar Chart</option>
-              </select>
-            </div>
-            
-            <div class="flex items-center gap-2">
-              <button id="toggle-machine-summary" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
-                Show Machine Summary
-              </button>
-            </div>
-          </div>
-
-          <div id="daily-chart-container" class="relative mb-8">
-            <canvas id="oilChart" style="height:320px;max-height:320px;width:100%;"></canvas>
-          </div>
-
-          <div id="machine-chart-container" class="relative mb-8" style="display: none;">
-            <canvas id="machineChart" style="height:320px;max-height:320px;width:100%;"></canvas>
-          </div>
-
-          <div id="machine-summary-table" style="display: none;" class="mb-8">
+            <!-- Logo Area -->
+            <div class="flex justify-center items-center mb-6">
+                <div class="w-56">
+                     <img src="images/GGPC logo.png" alt="GGPC Logo" onerror="this.style.display='none'">
+                </div>
             </div>
 
-        
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8 text-center">
-            <div class="bg-blue-50 p-3 rounded">
-              <div class="text-2xl font-bold text-blue-600" id="total-consumed"></div>
-              <div class="text-sm text-gray-600">Total Consumed (L)</div>
-            </div>
-            
-            <div class="bg-purple-50 p-3 rounded">
-              <div class="text-2xl font-bold text-purple-600" id="efficiency"></div>
-              <div class="text-sm text-gray-600">Avg L per Day</div>
+            <!-- Header Text -->
+            <div class="text-center mb-8">
+                <h1 id="welcome-text" class="text-4xl font-bold text-gray-800 mb-3 h-12"></h1>
+                <p class="text-gray-500">Sign in to access your dashboard.</p>
             </div>
 
-            <div class="bg-yellow-50 p-3 rounded">
-              <div class="text-2xl font-bold text-yellow-600" id="total-deliveries"></div>
-              <div class="text-sm text-gray-600">Total Deliveries (Pails)</div>
+            <form novalidate>
+                <!-- User Dropdown -->
+                <div class="relative mb-6">
+                    <label for="user-dropdown-button" class="block text-sm font-medium text-gray-600 mb-2">User</label>
+                    <input type="hidden" id="selected-user" name="username">
+                    
+                    <button type="button" id="user-dropdown-button" class="w-full flex items-center justify-between px-4 py-4 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex items-center">
+                            <img id="selected-user-avatar" src="https://placehold.co/32x32/E0E7FF/4F46E5?text=?" alt="user avatar" class="w-8 h-8 rounded-full mr-4 avatar-image">
+                            <span id="selected-user-name" class="text-lg">Select User</span>
+                        </div>
+                        <svg id="dropdown-chevron" class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+
+                    <div id="user-dropdown-menu" class="dropdown-menu absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 opacity-0 transform -translate-y-2 scale-95 pointer-events-none">
+                        <ul class="py-1">
+                            <!-- User options will be dynamically inserted here by JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-600 mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </span>
+                        <input type="password" id="password" name="password" class="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password">
+                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700">
+                            <svg id="eye-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg id="eye-closed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 1.274-4.057 5.064-7 9.542-7 .847 0 1.67.127 2.452.364m-4.586 4.586a3 3 0 114.243 4.243M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Message Area -->
+                <div id="error-message" class="hidden text-red-500 text-sm mb-4 text-center font-medium">
+                    Invalid user or password. Please try again.
+                </div>
+
+                <!-- Login Button -->
+                <div>
+                    <button type="submit" id="login-button" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                        Log In
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center hidden">
+                <img src="images/GGPC logo.png" alt="Loading..." class="w-32 animate-pulse" onerror="this.style.display='none'">
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
-<footer class="bg-gray-50 text-gray-700 py-4 mt-8 border-t border-gray-200">
-  <div class="max-w-full mx-auto px-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-5 text-center sm:text-left">
- <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 sm:mt-0 mt-2 object-contain">   
-    <p class="text-sm flex items-center">
-      &copy; 2025 Daily Monitoring Dashboard — 
-      <span class="font-medium ml-1">EP-220 Toggle Oil</span>
-    </p>
-  </div>
-</footer>
-<script src="main.js"></script>
+
+    <!-- Vanilla JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             // --- Canvas Line Animation ---
+            const canvas = document.getElementById('line-animation-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+            const colors = ["#3b82f6"]; // Only use blue color
+
+            class Particle {
+                constructor(initialX, direction) {
+                    this.initialX = initialX;
+                    this.x = this.initialX;
+                    this.direction = direction;
+                    
+                    if (this.direction === 'down') {
+                        this.y = Math.random() * -canvas.height; // Start from above
+                        this.vy = Math.random() * 2 + 1; // Speed of falling
+                    } else { // direction is 'up'
+                        this.y = canvas.height + (Math.random() * canvas.height); // Start from below
+                        this.vy = -(Math.random() * 2 + 1); // Speed of rising
+                    }
+
+                    this.color = colors[0]; // Always use the first (and only) color
+                    this.length = Math.random() * 20 + 10;
+                }
+                update() {
+                    this.y += this.vy;
+                    
+                    // Reset logic based on direction
+                    if (this.direction === 'down' && this.y - this.length > canvas.height) {
+                        this.y = 0;
+                        this.x = this.initialX;
+                    } else if (this.direction === 'up' && this.y + this.length < 0) {
+                        this.y = canvas.height;
+                        this.x = this.initialX;
+                    }
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    // Draw the tail in the opposite direction of movement
+                    const tailY = this.direction === 'down' ? this.y - this.length : this.y + this.length;
+                    ctx.lineTo(this.x, tailY);
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+
+            function init() {
+                particles = [];
+                const numberOfParticles = 6; // Set exactly 6 lines
+                for (let i = 0; i < numberOfParticles; i++) {
+                    const segmentWidth = canvas.width / numberOfParticles;
+                    const initialX = segmentWidth * i + segmentWidth / 2;
+                    // First 3 go down, next 3 go up
+                    const direction = i < 3 ? 'down' : 'up';
+                    particles.push(new Particle(initialX, direction));
+                }
+            }
+
+            function animate() {
+                ctx.globalAlpha = 0.1; // Creates a trailing effect
+                ctx.fillStyle = '#f3f4f6'; // Match body bg-gray-100
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1;
+
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                init();
+            });
+
+            init();
+            animate();
+
+            // --- Typewriter Animation ---
+            const welcomeTextElement = document.getElementById('welcome-text');
+            const textArray = ["Welcome Back", "Log In"];
+            let textArrayIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+
+            function typeAndDelete() {
+                const currentText = textArray[textArrayIndex];
+                const typeSpeed = 120;
+                const deleteSpeed = 80;
+                const pauseTime = 1500;
+
+                welcomeTextElement.classList.add('typing-cursor');
+
+                if (isDeleting) {
+                    welcomeTextElement.textContent = currentText.substring(0, charIndex - 1);
+                    charIndex--;
+                    if (charIndex === 0) {
+                        isDeleting = false;
+                        textArrayIndex = (textArrayIndex + 1) % textArray.length;
+                        setTimeout(typeAndDelete, 500);
+                    } else {
+                        setTimeout(typeAndDelete, deleteSpeed);
+                    }
+                } else {
+                    welcomeTextElement.textContent = currentText.substring(0, charIndex + 1);
+                    charIndex++;
+                    if (charIndex === currentText.length) {
+                        isDeleting = true;
+                        setTimeout(typeAndDelete, pauseTime);
+                    } else {
+                        setTimeout(typeAndDelete, typeSpeed);
+                    }
+                }
+            }
+            
+            typeAndDelete();
+
+            // --- User data for populating the dropdown (NO PASSWORDS) ---
+            const users = [
+                { id: 'ivan_golosinda', name: 'Ivan Golosinda', avatar: 'images/ivan.png' },
+                { id: 'greg_esperanzate', name: 'Greg Esperanzate', avatar: 'images/greg.png' },
+                { id: 'mildred_negranza', name: 'Mildred Negranza', avatar: 'images/mildred.jpg' },
+            ];
+
+            // --- Element References ---
+            const dropdownButton = document.getElementById('user-dropdown-button');
+            const dropdownMenu = document.getElementById('user-dropdown-menu');
+            const dropdownChevron = document.getElementById('dropdown-chevron');
+            const selectedUserAvatar = document.getElementById('selected-user-avatar');
+            const selectedUserName = document.getElementById('selected-user-name');
+            const selectedUserInput = document.getElementById('selected-user');
+            const passwordInput = document.getElementById('password');
+            const togglePasswordButton = document.getElementById('toggle-password');
+            const eyeOpenIcon = document.getElementById('eye-open');
+            const eyeClosedIcon = document.getElementById('eye-closed');
+            const loginForm = document.querySelector('form');
+            const errorMessage = document.getElementById('error-message');
+            const loginButton = document.getElementById('login-button');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            let errorTimeout;
+
+            // --- Function to Reset the Form to its Initial State ---
+            const resetFormState = () => {
+                loadingOverlay.classList.add('hidden');
+                loginButton.disabled = false;
+                passwordInput.value = '';
+            };
+            
+            // --- Populate User Dropdown ---
+            const userList = dropdownMenu.querySelector('ul');
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50" data-userid="${user.id}">
+                        <img src="${user.avatar}" alt="${user.name}" class="w-8 h-8 rounded-full mr-4 avatar-image">
+                        <span class="text-lg">${user.name}</span>
+                    </a>
+                `;
+                userList.appendChild(li);
+            });
+
+            // --- Dropdown Toggle Logic ---
+            const toggleDropdown = () => {
+                dropdownMenu.classList.toggle('opacity-0');
+                dropdownMenu.classList.toggle('pointer-events-none');
+                dropdownMenu.classList.toggle('-translate-y-2');
+                dropdownMenu.classList.toggle('scale-95');
+                dropdownChevron.classList.toggle('rotate-180');
+            };
+
+            dropdownButton.addEventListener('click', toggleDropdown);
+
+            // --- Handle User Selection ---
+            userList.addEventListener('click', (e) => {
+                e.preventDefault();
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                const userId = link.dataset.userid;
+                const selectedUser = users.find(u => u.id === userId);
+
+                if (selectedUser) {
+                    selectedUserName.textContent = selectedUser.name;
+                    selectedUserAvatar.src = selectedUser.avatar;
+                    selectedUserInput.value = selectedUser.id;
+                }
+                toggleDropdown();
+            });
+
+            // --- Close dropdown when clicking outside ---
+            window.addEventListener('click', (e) => {
+                if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    if (!dropdownMenu.classList.contains('opacity-0')) {
+                        toggleDropdown();
+                    }
+                }
+            });
+
+            // --- Password Visibility Toggle ---
+            togglePasswordButton.addEventListener('click', () => {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                eyeOpenIcon.classList.toggle('hidden', isPassword);
+                eyeClosedIcon.classList.toggle('hidden', !isPassword);
+            });
+
+            // --- SECURE Login Form Submission Logic ---
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorMessage.classList.add('hidden');
+                
+                const selectedUserId = selectedUserInput.value;
+                const enteredPassword = passwordInput.value;
+
+                // Show loading animation
+                loadingOverlay.classList.remove('hidden');
+                loginButton.disabled = true;
+
+                try {
+                    const response = await fetch('/.netlify/functions/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: selectedUserId, password: enteredPassword }),
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // On success, wait 2.5 seconds then redirect
+                        setTimeout(() => {
+                            window.location.href = 'ep220.html';
+                        }, 2500);
+                    } else {
+                        // On failure, show error and reset the form
+                        errorMessage.classList.remove('hidden');
+                        errorTimeout = setTimeout(() => {
+                            errorMessage.classList.add('hidden');
+                        }, 3000);
+                        resetFormState();
+                    }
+                } catch (error) {
+                    // Handle network or server errors
+                    console.error('Login error:', error);
+                    errorMessage.textContent = 'An error occurred. Please try again.';
+                    errorMessage.classList.remove('hidden');
+                    resetFormState();
+                }
+            });
+
+            // --- Event listener to reset form on page show (handles back button) ---
+            window.addEventListener('pageshow', (event) => {
+                if (event.persisted) {
+                    resetFormState();
+                }
+            });
+            
+            resetFormState();
+        });
+    </script>
 
 </body>
 </html>

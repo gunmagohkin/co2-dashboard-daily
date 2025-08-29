@@ -3,91 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PL-1000 Plunger Oil Monitoring (6AM)</title>
-  <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
+  <title>PL-1000 Plunger Oil Monitoring</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 400px;
+      }
+    }
+    .rotate-180 { 
+        transform: rotate(180deg);
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-sans">
 
-<nav class="bg-white shadow">
-  <div class="max-w-full mx-auto px-4">
-    <div class="flex justify-between items-center h-14">
-      <div class="flex items-center space-x-3">
-        <a href="index.html">
-          <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 w-auto">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo and Title -->
+      <div class="flex items-center space-x-3 min-w-0">
+        <a href="#" class="flex-shrink-0">
+            <img src="images/GGPC logo.png" alt="Company Logo" class="h-8 sm:h-10 w-auto">
         </a>
-        <div class="text-lg font-bold">Daily Monitoring Dashboard</div>
+        <h1 class="text-sm sm:text-lg font-bold text-gray-800 truncate">Daily Monitoring Dashboard</h1>
       </div>
 
-      <div class="hidden lg:flex space-x-6">
+      <!-- Desktop Navigation -->
+      <div class="hidden lg:flex items-center space-x-1">
         <div class="relative group">
-          <a href="#" class="hover:text-blue-500 font-semibold flex items-center">
+          <button class="font-semibold text-blue-600 px-4 py-2 rounded-md hover:bg-gray-100 flex items-center transition-colors">
             Oil Usage in Operation
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </a>
-          <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-            <div class="py-1">
-              <a href="tellus46.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 46</a>
-              <a href="tellus32.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 32</a>
-              <a href="index.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">EP-220</a>
-              <a href="PL-1000.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">PL-1000</a>
-              <a href="kerosene.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Kerosene</a>
-            </div>
+            <i data-lucide="chevron-down" class="w-4 h-4 ml-2 group-hover:rotate-180 transition-transform"></i>
+          </button>
+          <div class="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 py-2 border border-gray-200">
+            <a href="tellus46.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 46
+            </a>
+            <a href="tellus32.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 32
+            </a>
+            <a href="ep220.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> EP-220
+            </a>
+            <a href="PL-1000.html" class="flex items-center px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-blue-500"></i> PL-1000
+            </a>
+            <a href="kerosene.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Kerosene
+            </a>
           </div>
         </div>
-
-        <a href="lpg.html" class="hover:text-blue-500 font-semibold">LPG Monitoring</a>
+        <a href="lpg.html" class="font-semibold text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100 hover:text-blue-600 transition-colors flex items-center">
+            <i data-lucide="flame" class="w-4 h-4 mr-2"></i> LPG Monitoring
+        </a>
       </div>
 
+      <!-- Mobile menu button -->
       <div class="lg:hidden">
-        <button id="menu-btn" class="focus:outline-none">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
+        <button id="menu-btn" class="focus:outline-none p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100">
+          <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4">
-    <div class="mb-2">
-      <button id="mobile-oil-toggle" class="block py-1 hover:text-blue-500 font-semibold w-full text-left flex items-center justify-between">
-        Oil Usage in Operation
-        <svg id="mobile-arrow" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      <div id="mobile-oil-submenu" class="hidden ml-4 mt-1">
-        <a href="tellus46.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 46</a>
-        <a href="tellus32.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 32</a>
-        <a href="index.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">EP-220</a>
-        <a href="PL-1000.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">PL-1000</a>
-        <a href="kerosene.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Kerosene</a>
+  <!-- Mobile Navigation -->
+  <div id="mobile-menu" class="lg:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden bg-white">
+    <div class="px-4 sm:px-6 pb-4 pt-2 border-t">
+      <div class="mt-2">
+        <button id="mobile-oil-toggle" class="block py-2 font-semibold text-gray-600 w-full text-left flex items-center justify-between">
+          Oil Usage in Operation
+          <i id="mobile-arrow" data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300"></i>
+        </button>
+        <div id="mobile-oil-submenu" class="pl-4 mt-2 space-y-2 transition-all duration-300 ease-in-out max-h-0 overflow-hidden">
+          <a href="tellus46.html" class="block py-1 text-gray-500 hover:text-blue-600">Tellus 46</a>
+          <a href="tellus32.html" class="block py-1 text-gray-500 hover:text-blue-600">Tellus 32</a>
+          <a href="ep220.html" class="block py-1 text-gray-500 hover:text-blue-600">EP-220</a>
+          <a href="PL-1000.html" class="block py-1 text-blue-600 font-semibold">PL-1000</a>
+          <a href="kerosene.html" class="block py-1 text-gray-500 hover:text-blue-600">Kerosene</a>
+        </div>
       </div>
+      <a href="lpg.html" class="block py-2 mt-2 font-semibold text-gray-600">LPG Monitoring</a>
     </div>
-
-    <a href="lpg.html" class="block py-1 hover:text-blue-500">LPG Monitoring</a>
   </div>
 </nav>
 
-<div class="p-4">
-  <div class="max-w-full overflow-x-auto">
-    <div class="bg-white p-4 rounded shadow-md">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-2 mb-4">
-          <h1 id="category-title" class="text-lg font-bold">PL-1000</h1>
-          <h1 class="text-lg font-bold">Plunger Oil Monitoring</h1>
+<!-- Main Content -->
+<main class="p-4 sm:p-6 lg:p-8">
+  <div class="mx-auto">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+      
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 border-b pb-6">
+        <!-- Title -->
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+                <i data-lucide="filter"></i>
+            </div>
+            <div>
+                <h1 id="category-title" class="text-xl font-bold text-gray-800">PL-1000</h1>
+                <p class="text-sm text-gray-500">Plunger Oil Monitoring</p>
+            </div>
         </div>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-          <div class="flex gap-2">
-             <select id="plant-select" class="border rounded p-1">
+        
+        <!-- Controls Section -->
+        <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-2">
+          <!-- Plant Select -->
+          <div class="relative w-full sm:w-auto">
+            <select id="plant-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
               <option value="GGPC - Gunma Gohkin" selected>GGPC - Gunma Gohkin</option>
               <option value="CDPC - Creative Diecast">CDPC - Creative Diecast</option>
             </select>
-            <select id="month-select" class="border rounded p-1">
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+
+          <!-- Month Select -->
+          <div class="relative w-full sm:w-auto">
+            <select id="month-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
               <option value="01">January</option>
               <option value="02">February</option>
               <option value="03">March</option>
@@ -101,157 +165,628 @@
               <option value="11">November</option>
               <option value="12">December</option>
             </select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
 
-            <select id="year-select" class="border rounded p-1">
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
+          <!-- Year Select -->
+          <div class="relative w-full sm:w-auto">
+            <select id="year-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+              <!-- dynamically populated -->
             </select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
           </div>
-        </div>
-      </div>
-    
-      <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-8 gap-2 mb-2">
-        <div>
-          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
-            <span>PAIL:</span><span>1</span>
-          </div>
-          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between">
-            <span>PAIL/Liter:</span><span>20</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-end my-4">
-        <button id="timeframe-toggle-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors">
-            Switch to Weekly View
-        </button>
-      </div>
-      
-      <div id="daily-table-container">
-        <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
-          <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
-            <thead class="sticky top-0 bg-gradient-to-r from-blue-50 to-blue-100 z-10">
-              <tr>
-                <th class="px-3 py-2 border border-gray-200 font-semibold text-gray-700 text-xs tracking-wide">Items</th>
-                </tr>
-            </thead>
-            <tbody>
-              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Consumed (Liters)</td>
-              </tr>
-              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Machine Run</td>
-              </tr>
-              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Remaining Stock (Liters)</td>
-              </tr>
-              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Delivery (Pail)</td>
-              </tr>
-              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Refill (Pail)</td>
-              </tr>
-              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Pail</td>
-              </tr>
-              <tr class="even:bg-gray-50 odd:bg-white hover:bg-blue-50 transition">
-                <td class="px-3 py-2 border border-gray-200 font-bold text-gray-700">Total Stock Liters</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      <div id="weekly-summary-container" class="mt-8" style="display: none;">
-          </div>
-
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <div class="border border-gray-400 p-4 rounded bg-white">
-          <h2 class="font-bold mb-2" id="initial-data-title">Initial Data</h2>
-          <div>
-            <span><span class="font-semibold" id="avg-consumption-day-label">Average consumption / day:</span> <span class="font-bold" id="avg-consumption-day">0.00</span> L</span><br>
-            <span><span class="font-semibold" id="monthly-consumption-label">Monthly consumption:</span> <span class="font-bold" id="monthly-consumption">0.00</span> L</span>
-          </div>
-        </div>
-        <div class="border border-gray-400 p-4 rounded bg-white">
-          <b>Delivery Dates:</b><br>
-          <span id="delivery-date">Loading...</span>
-        </div>
-      </div>
-
-      <div class="mt-8">
-        <div class="bg-white p-6 rounded shadow-md">
-          <h2 id="chart-main-title" class="text-lg font-bold mb-4">PL-1000 Oil Consumption Analysis</h2>
           
-          <div id="chart-controls" class="flex flex-wrap gap-4 mb-6">
-            <div id="chart-view-control" class="flex items-center gap-2">
-              <label class="text-sm font-medium">View:</label>
-              <select id="chart-view" class="border rounded p-2 text-sm">
-                <option value="daily" selected>Daily Consumption</option>
-                <option value="machine">Consumption by Machine</option>
-              </select>
-            </div>
+          <!-- View Toggle Button -->
+          <button id="timeframe-toggle-btn" class="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+            <i data-lucide="calendar-days" class="w-4 h-4"></i>
+            <span>Weekly View</span>
+          </button>
+        </div>
+      </div>
 
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium">Chart Type:</label>
-              <select id="chart-type" class="border rounded p-2 text-sm">
-                <option value="line" selected>Line Chart</option>
-                <option value="bar">Bar Chart</option>
-              </select>
-            </div>
+      <!-- Info Cards -->
+      <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-lg p-4 flex items-center gap-4">
+          <i data-lucide="box" class="w-8 h-8 text-blue-600"></i>
+          <div>
+              <div class="text-sm text-blue-700 font-medium">PAIL</div>
+              <div class="text-2xl text-blue-900 font-bold">1</div>
+          </div>
+        </div>
+        <div class="bg-green-50 border-l-4 border-green-400 rounded-r-lg p-4 flex items-center gap-4">
+          <i data-lucide="beaker" class="w-8 h-8 text-green-600"></i>
+          <div>
+              <div class="text-sm text-green-700 font-medium">PAIL / Liter</div>
+              <div class="text-2xl text-green-900 font-bold">20</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Table Container -->
+      <div id="daily-table-container" class="mb-8">
+        <div class="table-container custom-scroll">
+          <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+            <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
+              <thead class="sticky top-0 bg-gray-100 z-10">
+                <tr>
+                  <th class="px-3 py-3 border-b border-gray-200 font-semibold text-gray-700 text-xs tracking-wide min-w-[150px] text-left">Items</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white">
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2 border-b border-gray-200 font-semibold text-gray-800 text-left">Total Consumed (Liters)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2 border-b border-gray-200 font-semibold text-gray-800 text-left">Machine Run</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2 border-b border-gray-200 font-semibold text-gray-800 text-left">Remaining Stock (Liters)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2 border-b border-gray-200 font-semibold text-gray-800 text-left">Delivery (Pail)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2 border-b border-gray-200 font-semibold text-gray-800 text-left">Refill (Pail)</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2 border-b border-gray-200 font-semibold text-gray-800 text-left">Total Stock Pail</td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2 font-semibold text-gray-800 text-left">Total Stock Liters</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Summary Container -->
+      <div id="weekly-summary-container" class="mt-8" style="display: none;">
+        <!-- Weekly summary content will be populated by JavaScript -->
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <h2 class="font-bold text-lg text-gray-800 mb-4" id="initial-data-title">Monthly Summary</h2>
+          <div class="space-y-4">
+            <p class="flex justify-between items-baseline">
+              <span class="font-medium text-gray-600 text-sm" id="avg-consumption-day-label">Average consumption / day</span>
+              <span class="font-bold text-blue-600 text-xl" id="avg-consumption-day">0</span>
+            </p>
+            <p class="flex justify-between items-baseline">
+              <span class="font-medium text-gray-600 text-sm" id="monthly-consumption-label">Monthly consumption</span>
+              <span class="font-bold text-blue-600 text-xl" id="monthly-consumption">0</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <h2 class="font-bold text-lg text-gray-800 mb-4">Delivery Dates</h2>
+          <p id="delivery-date" class="text-gray-700 text-sm leading-relaxed">-</p>
+        </div>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="mt-8">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <h2 id="chart-main-title" class="text-xl font-bold mb-4 text-gray-800">PL-1000 Oil Consumption Analysis</h2>
+          
+          <div id="chart-controls" class="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
             
             <div class="flex items-center gap-2">
-              <button id="toggle-machine-summary" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
+              <label class="text-sm font-medium text-gray-700 whitespace-nowrap">View:</label>
+              <div class="relative">
+                <select id="chart-view" class="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+                  <option value="daily" selected>Daily Consumption</option>
+                  <option value="machine">Consumption by Machine</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-500 transition-transform duration-300">
+                  <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Chart Type:</label>
+              <div class="relative">
+                <select id="chart-type" class="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+                  <option value="line" selected>Line Chart</option>
+                  <option value="bar">Bar Chart</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-500 transition-transform duration-300">
+                  <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center sm:ml-auto">
+              <button id="toggle-machine-summary" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition whitespace-nowrap">
                 Show Machine Summary
               </button>
             </div>
           </div>
 
           <div id="daily-chart-container" class="relative mb-8">
-            <canvas id="oilChart" style="height:320px;max-height:320px;width:100%;"></canvas>
+            <div class="chart-container">
+              <canvas id="oilChart"></canvas>
+            </div>
           </div>
 
           <div id="machine-chart-container" class="relative mb-8" style="display: none;">
-            <canvas id="machineChart" style="height:320px;max-height:320px;width:100%;"></canvas>
+            <div class="chart-container">
+              <canvas id="machineChart"></canvas>
+            </div>
           </div>
 
           <div id="machine-summary-table" style="display: none;" class="mb-8">
-            </div>
+            <!-- Machine summary content will be populated by JavaScript -->
+          </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6 text-center">
-            <div class="bg-blue-50 p-3 rounded">
-              <div class="text-2xl font-bold text-blue-600" id="total-consumed">0.00</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 text-center">
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <div class="text-2xl font-bold text-blue-600" id="total-consumed">0</div>
               <div class="text-sm text-gray-600">Total Consumed (L)</div>
             </div>
-            <div class="bg-purple-50 p-3 rounded">
-              <div class="text-2xl font-bold text-purple-600" id="efficiency">0.00</div>
+            
+            <div class="bg-purple-50 p-4 rounded-lg">
+              <div class="text-2xl font-bold text-purple-600" id="efficiency">0</div>
               <div class="text-sm text-gray-600">Avg L per Day</div>
             </div>
-            <div class="bg-yellow-50 p-3 rounded">
-                <div class="text-2xl font-bold text-yellow-600" id="total-deliveries"></div>
-                <div class="text-sm text-gray-600">Total Deliveries (Pails)</div>
+
+            <div class="bg-yellow-50 p-4 rounded-lg">
+              <div class="text-2xl font-bold text-yellow-600" id="total-deliveries">0</div>
+              <div class="text-sm text-gray-600">Total Deliveries (Pails)</div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</main>
 
-<footer class="bg-gray-50 text-gray-700 py-4 mt-8 border-t border-gray-200">
-  <div class="max-w-full mx-auto px-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-5 text-center sm:text-left">
-    <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 sm:mt-0 mt-2 object-contain">   
-    <p class="text-sm flex items-center">
-      &copy; 2025 Daily Monitoring Dashboard — 
-      <span class="font-medium ml-1">PL-1000 Plunger Oil</span>
+<!-- Footer -->
+<footer class="bg-white text-gray-700 py-6 mt-8 border-t border-gray-200">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left">
+    <div class="flex items-center gap-2">
+      <img src="images/GGPC logo.png" alt="Company Logo" class="h-8 w-auto">   
+      <p class="text-sm">
+        &copy; 2025 Daily Monitoring Dashboard
+      </p>
+    </div>
+    <p class="text-sm mt-2 sm:mt-0">
+      <span class="font-medium">PL-1000 Plunger Oil</span>
     </p>
   </div>
 </footer>
 
-<script src="pl-2.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- MOCK DATA FUNCTION (FOR DEMO) ---
+    const fetchMockData = (month, year) => {
+        const records = [];
+        const daysInMonth = new Date(year, month, 0).getDate();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const isOperatingDay = Math.random() > 0.3; // 70% chance of operating
+            if (isOperatingDay) {
+                records.push({
+                    "Date_Today": { "value": `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` },
+                    "Consumption_Category": { "value": "PL-1000" },
+                    "Plant_Location": { "value": "GGPC - Gunma Gohkin" },
+                    "Total_Consumed_PL": { "value": (Math.random() * 15).toFixed(2) },
+                    "Machine_Run_PL": { "value": (Math.floor(Math.random() * 3) + 1).toString() },
+                    "Remaining_Stock_PL": { "value": (80 - day * 1.5).toFixed(2) },
+                    "Delivery_PL": { "value": (day % 12 === 0) ? '1' : '0' },
+                    "Refill_PL": { "value": (day % 6 === 0) ? '1' : '0' },
+                    "Total_Stock_PL_Pail": { "value": '4' },
+                    "Total_Stock_PL_Lit": { "value": '80' }
+                });
+            }
+        }
+        return { records };
+    };
+    
+    // --- KINTONE FETCH FUNCTION ---
+    const fetchKintoneAllData = async (month, year) => {
+        try {
+            const url = `/.netlify/functions/kintone?month=${month}&year=${year}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.error('Failed to fetch data from Kintone API');
+                return fetchMockData(month, year).records;
+            }
+            const data = await response.json();
+            return data.records || [];
+        } catch (error) {
+            console.error('Error fetching from Netlify function:', error);
+            return fetchMockData(month, year).records;
+        }
+    };
+  
+  // Global variables
+  let allRecords = [];
+  let oilChart;
+  let machineChart;
+  let currentTimeframe = 'daily';
 
+  // CONFIG MAP
+  const CONFIG_MAP = {
+    'PL-1000': {
+      table: [
+        { label: 'Total Consumed (Liters)', key: 'Total_Consumed_PL' },
+        { label: 'Machine Run', key: 'Machine_Run_PL' },
+        { label: 'Remaining Stock (Liters)', key: 'Remaining_Stock_PL' },
+        { label: 'Delivery (Pail)', key: 'Delivery_PL' },
+        { label: 'Refill (Pail)', key: 'Refill_PL' },
+        { label: 'Total Stock Pail', key: 'Total_Stock_PL_Pail' },
+        { label: 'Total Stock Liters', key: 'Total_Stock_PL_Lit' }
+      ],
+      chart: {
+        consumptionKey: 'Total_Consumed_PL',
+        runtimeKey: 'Machine_Run_PL',
+        title: 'PL-1000 Oil Consumption'
+      },
+      deliveryKey: 'Delivery_PL',
+      machineKey: 'Machine_ID'
+    }
+  };
+
+  const MONTH_NAMES = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // UTILITY FUNCTIONS
+  function getCurrentCategory() {
+    return document.getElementById('category-title')?.textContent.trim() || Object.keys(CONFIG_MAP)[0];
+  }
+
+  function getCurrentPlant() {
+    return document.getElementById('plant-select')?.value || 'GGPC - Gunma Gohkin';
+  }
+
+  function filterRecords(records, category, plant) {
+    return records.filter(r => 
+      r['Consumption_Category']?.value === category && 
+      r['Plant_Location']?.value === plant
+    );
+  }
+
+  // TABLE RENDERING
+  function renderTable(records, daysInMonth, selectedYear, selectedMonth, config) {
+    const table = document.getElementById('daily-table');
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    const headerRow = table.querySelector('thead tr');
+
+    while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
+    for (let day = 1; day <= daysInMonth; day++) {
+      const th = document.createElement('th');
+      th.className = 'border-b border-gray-200 px-2 py-2 font-semibold text-gray-600 text-xs whitespace-nowrap';
+      th.textContent = day.toString();
+      headerRow.appendChild(th);
+    }
+
+    Array.from(tbody.querySelectorAll('tr')).forEach(row => {
+      while (row.children.length > 1) row.removeChild(row.lastChild);
+    });
+
+    config.table.forEach((item, rowIdx) => {
+      const row = tbody.children[rowIdx];
+      if (!row) return;
+      for (let day = 1; day <= daysInMonth; day++) {
+        const td = document.createElement('td');
+        td.className = row.children[0].className.replace('font-semibold text-gray-800 text-left', 'text-center');
+        const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const rec = records.find(r => r['Date_Today']?.value === dateStr);
+        td.textContent = rec?.[item.key]?.value || '-';
+        row.appendChild(td);
+      }
+    });
+  }
+
+  // STATS RENDERING
+  function renderStats(records, config, daysInMonth, selectedMonth, selectedYear) {
+    const totalConsumed = records.reduce((sum, r) => sum + (parseFloat(r[config.chart.consumptionKey]?.value) || 0), 0);
+    const operatingDays = records.filter(r => (r[config.chart.runtimeKey]?.value || '').trim() !== '' && parseFloat(r[config.chart.consumptionKey]?.value) > 0).length;
+    const avgConsumption = operatingDays > 0 ? totalConsumed / operatingDays : 0;
+    const totalDeliveries = records.reduce((sum, r) => sum + (parseFloat(r[config.deliveryKey]?.value) || 0), 0);
+
+    document.getElementById('total-consumed').textContent = totalConsumed.toFixed(2);
+    document.getElementById('efficiency').textContent = avgConsumption.toFixed(2);
+    document.getElementById('total-deliveries').textContent = totalDeliveries;
+    
+    document.getElementById('avg-consumption-day').textContent = avgConsumption.toFixed(2);
+    document.getElementById('monthly-consumption').textContent = totalConsumed.toFixed(2);
+
+    const deliveryElem = document.getElementById('delivery-date');
+    if (deliveryElem) {
+      const deliveryRecords = records.filter(r => Number(r[config.deliveryKey]?.value) > 0).map(r => ({ day: new Date(r['Date_Today'].value).getDate(), amount: r[config.deliveryKey]?.value }));
+      if (deliveryRecords.length) {
+        const monthName = MONTH_NAMES[parseInt(selectedMonth, 10) - 1];
+        deliveryElem.innerHTML = deliveryRecords.map(rec => `${monthName} ${rec.day} – <strong>${rec.amount} Pail(s)</strong>`).join('<br>');
+      } else {
+        deliveryElem.textContent = 'No deliveries this month.';
+      }
+    }
+  }
+
+  // CHART RENDERING
+  function renderChart(records, daysInMonth, selectedYear, selectedMonth, config) {
+    let labels = [], consumptionData = [];
+    const chartTitle = document.getElementById('chart-main-title');
+
+    if (currentTimeframe === 'weekly') {
+      const weeklyAggregates = aggregateDataByWeek(records, daysInMonth, selectedYear, selectedMonth, config);
+      labels = weeklyAggregates.map(w => `Week ${w.week}`);
+      consumptionData = weeklyAggregates.map(w => w.totalConsumption);
+      chartTitle.textContent = 'Weekly Oil Consumption Analysis';
+    } else {
+      labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+      consumptionData = labels.map(day => {
+          const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const rec = records.find(r => r['Date_Today']?.value === dateStr);
+          return parseFloat(rec?.[config.chart.consumptionKey]?.value) || 0;
+      });
+      chartTitle.textContent = 'Daily Oil Consumption Analysis';
+    }
+      
+    const ctx = document.getElementById('oilChart').getContext('2d');
+    const chartType = document.getElementById('chart-type')?.value || 'line';
+
+    if (oilChart) oilChart.destroy();
+    
+    oilChart = new Chart(ctx, {
+      type: chartType,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Total Consumption (Liters)',
+          data: consumptionData,
+          backgroundColor: 'rgba(59,130,246,0.2)',
+          borderColor: 'rgba(59,130,246,1)',
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: 'rgba(59,130,246,1)',
+          pointHoverRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, title: { display: true, text: currentTimeframe === 'weekly' ? 'Total Weekly Consumption' : 'Daily Total Consumption' } },
+        scales: {
+          x: { title: { display: true, text: currentTimeframe === 'weekly' ? 'Week of the Month' : 'Day of the Month' } },
+          y: { beginAtZero: true, title: { display: true, text: 'Liters' } }
+        }
+      }
+    });
+  }
+
+  // DATA AGGREGATION
+  function aggregateDataByWeek(records, daysInMonth, selectedYear, selectedMonth, config) {
+    const weeklyData = {};
+    for (let day = 1; day <= daysInMonth; day++) {
+      const week = Math.ceil(day / 7);
+      if (!weeklyData[week]) weeklyData[week] = { totalConsumption: 0, machineOperatingDays: 0, totalDelivery: 0, totalRefills: 0 };
+      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const rec = records.find(r => r['Date_Today']?.value === dateStr);
+      if(rec){
+        const dailyConsumption = parseFloat(rec[config.chart.consumptionKey]?.value) || 0;
+        if ((rec[config.chart.runtimeKey]?.value || '').trim() !== '' && dailyConsumption > 0) weeklyData[week].machineOperatingDays++;
+        weeklyData[week].totalConsumption += dailyConsumption;
+        weeklyData[week].totalDelivery += parseFloat(rec[config.deliveryKey]?.value) || 0;
+        weeklyData[week].totalRefills += parseFloat(rec['Refill_PL']?.value) || 0;
+      }
+    }
+    return Object.entries(weeklyData).map(([week, data]) => ({ week, ...data }));
+  }
+
+  function renderWeeklySummaryTable(records, daysInMonth, selectedYear, selectedMonth, config) {
+    const container = document.getElementById('weekly-summary-container');
+    if (!container) return;
+    const weeklyAggregates = aggregateDataByWeek(records, daysInMonth, selectedYear, selectedMonth, config);
+    let tableHTML = `<h2 class="text-lg font-bold mb-4">Weekly Summary</h2><div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm custom-scroll"><table class="min-w-full text-sm text-left">
+      <thead class="bg-gray-50"><tr>
+        <th class="px-4 py-2 font-semibold">Week</th><th class="px-4 py-2 font-semibold">Total Consumed (L)</th><th class="px-4 py-2 font-semibold">Operating Days</th><th class="px-4 py-2 font-semibold">Avg. L/Day</th><th class="px-4 py-2 font-semibold">Deliveries</th><th class="px-4 py-2 font-semibold">Refills</th>
+      </tr></thead><tbody>`;
+    weeklyAggregates.forEach(w => {
+      const efficiency = w.machineOperatingDays > 0 ? w.totalConsumption / w.machineOperatingDays : 0;
+      tableHTML += `<tr class="border-t hover:bg-gray-50">
+        <td class="px-4 py-2 font-bold">Week ${w.week}</td><td class="px-4 py-2">${w.totalConsumption.toFixed(2)}</td><td class="px-4 py-2">${w.machineOperatingDays}</td><td class="px-4 py-2">${efficiency.toFixed(2)}</td><td class="px-4 py-2">${w.totalDelivery}</td><td class="px-4 py-2">${w.totalRefills}</td>
+      </tr>`;
+    });
+    container.innerHTML = tableHTML + `</tbody></table></div>`;
+  }
+
+  // MACHINE CONSUMPTION
+  function groupConsumptionByMachine(records, config) {
+      const machineData = {};
+      records.forEach(record => {
+          const machineId = record[config.chart.runtimeKey]?.value || 'Unknown';
+          const consumption = parseFloat(record[config.chart.consumptionKey]?.value) || 0;
+          if (consumption === 0) return;
+          if (!machineData[machineId]) machineData[machineId] = { totalConsumption: 0, days: 0 };
+          machineData[machineId].totalConsumption += consumption;
+          machineData[machineId].days++;
+      });
+      return machineData;
+  }
+  
+  function renderMachineChart(records, config) {
+      const machineData = groupConsumptionByMachine(records, config);
+      const machines = Object.keys(machineData).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+      const ctx = document.getElementById('machineChart').getContext('2d');
+      if (machineChart) machineChart.destroy();
+      machineChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+              labels: machines.map(m => isNaN(m) ? m : `Machine ${m}`),
+              datasets: [{
+                  label: 'Total Oil Consumption (Liters)',
+                  data: machines.map(m => machineData[m].totalConsumption),
+                  backgroundColor: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#6366F1']
+              }]
+          },
+          options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: {display: false}, title: { display: true, text: 'Oil Consumption by Machine', font: { size: 16 } } },
+              scales: { y: { beginAtZero: true, title: { display: true, text: 'Oil Consumption (Liters)' } } }
+          }
+      });
+  }
+
+  function renderMachineConsumptionTable(records, config) {
+      const tableContainer = document.getElementById('machine-summary-table');
+      if (!tableContainer) return;
+      const machineData = groupConsumptionByMachine(records, config);
+      const machines = Object.keys(machineData).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+      const grandTotal = machines.reduce((sum, machine) => sum + machineData[machine].totalConsumption, 0);
+      let tableHTML = `<div class="bg-white p-6 rounded-lg shadow-md border"><h3 class="text-lg font-bold mb-4">Machine Consumption Summary</h3><div class="overflow-x-auto custom-scroll"><table class="min-w-full text-sm">
+          <thead class="bg-gray-50"><tr>
+              <th class="px-4 py-2 font-semibold text-left">Machine</th><th class="px-4 py-2 font-semibold text-right">Total (L)</th><th class="px-4 py-2 font-semibold text-center">Days</th><th class="px-4 py-2 font-semibold text-right">Avg/Day (L)</th><th class="px-4 py-2 font-semibold text-right">% of Total</th>
+          </tr></thead><tbody>`;
+      machines.forEach(machine => {
+          const data = machineData[machine];
+          const percentage = grandTotal > 0 ? (data.totalConsumption / grandTotal * 100) : 0;
+          tableHTML += `<tr class="border-t hover:bg-gray-50">
+              <td class="px-4 py-2 font-medium">${isNaN(machine) ? machine : `Machine ${machine}`}</td>
+              <td class="px-4 py-2 text-right font-bold text-blue-600">${data.totalConsumption.toFixed(2)}</td>
+              <td class="px-4 py-2 text-center">${data.days}</td>
+              <td class="px-4 py-2 text-right">${(data.totalConsumption/data.days).toFixed(2)}</td>
+              <td class="px-4 py-2 text-right">${percentage.toFixed(1)}%</td>
+          </tr>`;
+      });
+      tableHTML += `</tbody><tfoot class="bg-gray-100 font-bold border-t-2"><tr >
+          <td class="px-4 py-2">TOTAL</td><td class="px-4 py-2 text-right text-green-600">${grandTotal.toFixed(2)}</td><td colspan="3"></td>
+      </tr></tfoot></table></div></div>`;
+      tableContainer.innerHTML = tableHTML;
+  }
+
+  // CONTROLS
+  const monthSelect = document.getElementById('month-select');
+  const yearSelect = document.getElementById('year-select');
+  const plantSelect = document.getElementById('plant-select');
+  const chartTypeSelect = document.getElementById('chart-type');
+  const chartViewSelect = document.getElementById('chart-view');
+  const timeframeBtn = document.getElementById('timeframe-toggle-btn');
+
+  function setupControls() {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      for (let y = currentYear + 1; y >= 2022; y--) {
+        yearSelect.add(new Option(y, y));
+      }
+      yearSelect.value = currentYear.toString();
+      monthSelect.value = String(currentDate.getMonth() + 1).padStart(2, '0');
+  }
+
+  async function updateData() {
+    const m = monthSelect.value, y = yearSelect.value;
+    const d = new Date(y, m, 0).getDate();
+    const category = getCurrentCategory(), plant = getCurrentPlant();
+    const config = CONFIG_MAP[category] || {};
+    
+    allRecords = await fetchKintoneAllData(m, y);
+    const filteredRecords = filterRecords(allRecords, category, plant);
+
+    const dailyTable = document.getElementById('daily-table-container');
+    const weeklyTable = document.getElementById('weekly-summary-container');
+    const toggleBtnText = timeframeBtn.querySelector('span');
+
+    if (currentTimeframe === 'weekly') {
+      dailyTable.style.display = 'none';
+      weeklyTable.style.display = 'block';
+      if(toggleBtnText) toggleBtnText.textContent = 'Daily View';
+    } else {
+      dailyTable.style.display = 'block';
+      weeklyTable.style.display = 'none'; 
+      if(toggleBtnText) toggleBtnText.textContent = 'Weekly View';
+    }
+    
+    renderTable(filteredRecords, d, y, m, config);
+    renderWeeklySummaryTable(filteredRecords, d, y, m, config);
+    renderStats(filteredRecords, config, d, m, y);
+    renderChart(filteredRecords, d, y, m, config);
+    renderMachineChart(filteredRecords, config);
+    renderMachineConsumptionTable(filteredRecords, config);
+  }
+
+  [monthSelect, yearSelect, plantSelect, chartTypeSelect, chartViewSelect].forEach(el => el?.addEventListener('change', () => {
+      const dailyChart = document.getElementById('daily-chart-container');
+      const machineChartContainer = document.getElementById('machine-chart-container');
+      if (chartViewSelect.value === 'daily') {
+          dailyChart.style.display = 'block';
+          machineChartContainer.style.display = 'none';
+      } else {
+          dailyChart.style.display = 'none';
+          machineChartContainer.style.display = 'block';
+      }
+      updateData();
+  }));
+  
+  timeframeBtn.addEventListener('click', () => {
+    currentTimeframe = (currentTimeframe === 'daily') ? 'weekly' : 'daily';
+    updateData();
+  });
+
+  const summaryToggleBtn = document.getElementById('toggle-machine-summary');
+  summaryToggleBtn.addEventListener('click', () => {
+    const summaryTable = document.getElementById('machine-summary-table');
+    const isHidden = summaryTable.style.display === 'none';
+    summaryTable.style.display = isHidden ? 'block' : 'none';
+    summaryToggleBtn.textContent = isHidden ? 'Hide Machine Summary' : 'Show Machine Summary';
+    
+    // Correctly toggle between blue (active) and gray (inactive) states
+    summaryToggleBtn.classList.toggle('bg-blue-500', isHidden);
+    summaryToggleBtn.classList.toggle('hover:bg-blue-600', isHidden);
+    summaryToggleBtn.classList.toggle('bg-gray-500', !isHidden);
+    summaryToggleBtn.classList.toggle('hover:bg-gray-600', !isHidden);
+  });
+
+  // Mobile Menu
+  const menuBtn = document.getElementById('menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const mobileOilToggle = document.getElementById('mobile-oil-toggle');
+  const mobileOilSubmenu = document.getElementById('mobile-oil-submenu');
+  const mobileArrow = document.getElementById('mobile-arrow');
+
+  menuBtn.addEventListener('click', () => {
+    const isClosed = mobileMenu.style.maxHeight === '' || mobileMenu.style.maxHeight === '0px';
+    mobileMenu.style.maxHeight = isClosed ? mobileMenu.scrollHeight + "px" : '0px';
+  });
+
+  mobileOilToggle.addEventListener('click', () => {
+    mobileArrow.classList.toggle('rotate-180');
+    const isSubmenuClosed = mobileOilSubmenu.style.maxHeight === '' || mobileOilSubmenu.style.maxHeight === '0px';
+    mobileOilSubmenu.style.maxHeight = isSubmenuClosed ? mobileOilSubmenu.scrollHeight + "px" : '0px';
+    // Adjust parent menu height
+    setTimeout(() => {
+        const isParentClosed = mobileMenu.style.maxHeight === '' || mobileMenu.style.maxHeight === '0px';
+        if (!isParentClosed) {
+            mobileMenu.style.maxHeight = mobileMenu.scrollHeight + "px";
+        }
+    }, 300);
+  });
+  
+  // Dropdown icon animations
+  document.querySelectorAll("select").forEach(select => {
+    const iconWrapper = select.nextElementSibling;
+    if (iconWrapper) {
+        select.addEventListener("focus", () => iconWrapper.classList.add("rotate-180"));
+        select.addEventListener("blur", () => iconWrapper.classList.remove("rotate-180"));
+    }
+  });
+
+  lucide.createIcons();
+  setupControls();
+  await updateData();
+});
+</script>
 </body>
 </html>

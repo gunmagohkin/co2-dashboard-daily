@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const fetchKintoneAllData = async (month, year) => {
+    // Fetches Kintone data for an entire year.
+    const fetchKintoneDataForYear = async (year) => {
         try {
-            const url = `/.netlify/functions/kintone?month=${month}&year=${year}`;
+            // This URL requests data for the 'Kerosene' category.
+            const url = `/.netlify/functions/kintone?year=${year}&category=Kerosene`;
             const response = await fetch(url);
             if (!response.ok) {
-                console.error('Failed to fetch data from Kintone API');
+                console.error('Failed to fetch data from Kintone API for year:', year);
                 return [];
             }
             const data = await response.json();
@@ -17,27 +19,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // --- CONFIG & GLOBAL VARS ---
     const CONFIG_MAP = {
-      'KEROSENE': [
+      'Kerosene': [
           { label: 'Stock (L)', key: 'Total_Remaining_Stock_Kerosene' },
           { label: 'Shift/Use (L)', key: 'Shift' },
           { label: 'Press M#', key: 'Press_Machine_No' },
           { label: 'Remarks', key: 'Remarks_Kerosene' }
       ],
     };
-    let allRecords = [];
+    let yearlyRecords = []; 
     let oilChart;
 
     // --- UTILITY FUNCTIONS ---
-    function getCurrentCategory() { return document.getElementById('category-title')?.textContent.trim() || 'KEROSENE'; }
+    function getCurrentCategory() { return document.getElementById('category-title')?.textContent.trim() || 'Kerosene'; }
     function getCurrentPlant() { return document.getElementById('plant-select')?.value || 'GGPC - Gunma Gohkin'; }
-    function filterRecordsByCategory(records, category, plant) {
-        return records.filter(r => r['Consumption_Category']?.value === category && r['Plant_Location']?.value === plant);
+    function filterRecordsByPlant(records, plant) {
+        return records.filter(r => r['Plant_Location']?.value === plant);
     }
+    // CORRECTED: This function now reliably gets the date from either 'Date_To' or 'Date_Today'.
+    const getRecordDate = (record) => record?.Date_To?.value || record?.Date_Today?.value;
+
     function normalizeKintoneDate(dateValue) {
         return dateValue ? new Date(dateValue).toISOString().split('T')[0] : null;
     }
 
-    // --- NEW TRANSPOSED TABLE RENDERER ---
+    // --- TRANSPOSED TABLE RENDERER ---
     function renderTable(records, selectedYear, selectedMonth) {
       const table = document.getElementById('kerosene-table');
       const tableHead = table.querySelector('thead');
@@ -52,7 +57,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isCurrentMonth = today.getFullYear() == selectedYear && (today.getMonth() + 1) == selectedMonth;
       const currentDay = today.getDate();
 
-      // 1. Create Header Row (Days)
       const headerRow = tableHead.insertRow();
       const thMetric = document.createElement('th');
       thMetric.className = "p-3 text-left bg-gray-100 border-b border-r";
@@ -69,7 +73,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         headerRow.appendChild(thDay);
       }
 
-      // 2. Create Data Rows (Metrics)
       const category = getCurrentCategory();
       const config = CONFIG_MAP[category] || [];
 
@@ -82,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         for (let day = 1; day <= daysInMonth; day++) {
             const targetDateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const record = records.find(r => normalizeKintoneDate(r['Date_Today']?.value) === targetDateStr);
+            const record = records.find(r => normalizeKintoneDate(getRecordDate(r)) === targetDateStr);
             const cell = row.insertCell();
             cell.className = 'p-3 text-center border-b border-r';
             cell.textContent = record?.[metric.key]?.value || '-';
@@ -93,23 +96,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // --- STATS RENDERER ---
+    // --- STATS RENDERER (FIXED) ---
     function renderStats(records) {
       const totalUsage = records.reduce((sum, r) => sum + (parseFloat(r.Shift?.value) || 0), 0);
-      const daysWithData = records.filter(r => r.Shift?.value && parseFloat(r.Shift.value) > 0).length;
-      const avgUsage = daysWithData > 0 ? totalUsage / daysWithData : 0;
-      let currentStock = 0;
+      const daysWithUsage = records.filter(r => r.Shift?.value && parseFloat(r.Shift.value) > 0);
+      const avgUsage = daysWithUsage.length > 0 ? totalUsage / daysWithUsage.length : 0;
+      
+      let latestStock = 0;
       if (records.length > 0) {
-          const sortedRecords = [...records].sort((a,b) => new Date(b.Date_Today.value) - new Date(a.Date_Today.value));
-          const latestRecordWithStock = sortedRecords.find(r => r.Total_Remaining_Stock_Kerosene?.value);
-          if (latestRecordWithStock) {
-              currentStock = parseFloat(latestRecordWithStock.Total_Remaining_Stock_Kerosene.value) || 0;
+          const sortedRecordsWithStock = [...records]
+              .filter(r => r.Total_Remaining_Stock_Kerosene?.value)
+              .sort((a,b) => new Date(getRecordDate(b)) - new Date(getRecordDate(a))); 
+          
+          if (sortedRecordsWithStock.length > 0) {
+              latestStock = parseFloat(sortedRecordsWithStock[0].Total_Remaining_Stock_Kerosene.value) || 0;
           }
       }
+
       document.getElementById('total-consumed').textContent = totalUsage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
       document.getElementById('avg-consumption').textContent = avgUsage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('current-stock-chart').textContent = currentStock.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('days-with-data').textContent = daysWithData;
+      document.getElementById('current-stock-chart').textContent = latestStock.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('days-with-data').textContent = daysWithUsage.length;
     }
 
     // --- CHART RENDERER ---
@@ -122,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       for (let day = 1; day <= daysInMonth; day++) {
         const targetDateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const rec = records.find(r => normalizeKintoneDate(r['Date_Today']?.value) === targetDateStr);
+        const rec = records.find(r => normalizeKintoneDate(getRecordDate(r)) === targetDateStr);
         usageData.push(rec?.Shift?.value ? parseFloat(rec.Shift.value) : null);
         stockData.push(rec?.Total_Remaining_Stock_Kerosene?.value ? parseFloat(rec.Total_Remaining_Stock_Kerosene.value) : null);
       }
@@ -166,20 +173,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         monthSelect.value = String(currentDate.getMonth() + 1).padStart(2, '0');
     }
 
-    async function updateData() {
+    async function fetchAndRenderData() {
+        const year = yearSelect.value;
+        yearlyRecords = await fetchKintoneDataForYear(year);
+        updateDisplay();
+    }
+
+    function updateDisplay() {
         const m = monthSelect.value, y = yearSelect.value, p = plantSelect.value;
         const d = new Date(y, m, 0).getDate();
-        const category = getCurrentCategory();
+
+        const recordsForMonth = yearlyRecords.filter(r => {
+            const recordDate = new Date(getRecordDate(r));
+            return recordDate.getMonth() + 1 == m;
+        });
         
-        allRecords = await fetchKintoneAllData(m, y);
-        const filteredRecords = filterRecordsByCategory(allRecords, category, p);
+        const filteredRecords = filterRecordsByPlant(recordsForMonth, p);
 
         renderTable(filteredRecords, y, m);
         renderStats(filteredRecords);
         renderChart(filteredRecords, d, y, m);
     }
     
-    [monthSelect, yearSelect, plantSelect].forEach(el => el?.addEventListener('change', updateData));
+    yearSelect.addEventListener('change', fetchAndRenderData);
+    [monthSelect, plantSelect].forEach(el => el?.addEventListener('change', updateDisplay));
 
     // Mobile Menu
     const menuBtn = document.getElementById('menu-btn');
@@ -213,5 +230,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     lucide.createIcons();
     setupControls();
-    await updateData();
+    await fetchAndRenderData();
 });
+

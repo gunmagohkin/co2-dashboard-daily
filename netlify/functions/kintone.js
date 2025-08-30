@@ -25,7 +25,7 @@ exports.handler = async function (event) {
 
     if (category) {
       if (query) query += ' and ';
-      query += `Consumption_Category = "${category}"`;
+      query += `Consumption_Category in ("${category}")`;
     }
 
     console.log("Final query:", query);

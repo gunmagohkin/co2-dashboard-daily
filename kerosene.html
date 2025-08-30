@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
   <title>Kerosene Monitoring Dashboard</title>
-  <link rel="icon" type="image/x-icon" href="https://placehold.co/32x32/3B82F6/FFFFFF?text=G">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -18,34 +17,40 @@
       font-family: 'Inter', sans-serif;
     }
     .custom-scroll::-webkit-scrollbar {
-      height: 6px;
+      height: 8px;
+      width: 8px;
     }
     .custom-scroll::-webkit-scrollbar-track {
       background: #f1f5f9;
-      border-radius: 3px;
+      border-radius: 4px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
       background: #cbd5e1;
-      border-radius: 3px;
+      border-radius: 4px;
     }
     .custom-scroll::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
     .chart-container {
       position: relative;
-      height: 300px;
-      width: 100%;
-    }
-    @media (min-width: 768px) {
-      .chart-container {
-        height: 400px;
-      }
+      height: 400px;
     }
     .rotate-180 { 
         transform: rotate(180deg);
     }
-    .filled-row {
-      background-color: #eff6ff;
+    /* Styles for the new transposed table */
+    .table-container thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .table-container tbody th {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+    }
+     .today-col {
+      background-color: #dbeafe !important; /* A light blue color */
     }
   </style>
 </head>
@@ -66,39 +71,23 @@
       <!-- Desktop Navigation -->
       <div class="hidden lg:flex items-center space-x-1">
         <div class="relative group">
-          <button class="font-semibold text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100 hover:text-blue-600 flex items-center transition-colors">
+          <button class="font-semibold text-blue-600 bg-blue-50 px-4 py-2 rounded-md flex items-center transition-colors">
             Oil Usage in Operation
             <i data-lucide="chevron-down" class="w-4 h-4 ml-2 group-hover:rotate-180 transition-transform"></i>
           </button>
           <div class="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 py-2 border border-gray-200">
-            <a href="tellus46.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 46
-            </a>
-            <a href="tellus32.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 32
-            </a>
-            <a href="ep220.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> EP-220
-            </a>
-            <a href="PL-1000.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> PL-1000
-            </a>
-            <a href="kerosene.html" class="flex items-center px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50">
-              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-blue-500"></i> Kerosene
-            </a>
+            <a href="tellus46.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 46</a>
+            <a href="tellus32.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 32</a>
+            <a href="ep220.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> EP-220</a>
+            <a href="PL-1000.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> PL-1000</a>
+            <a href="kerosene.html" class="flex items-center px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-blue-500"></i> Kerosene</a>
           </div>
         </div>
-        <a href="lpg.html" class="font-semibold text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100 hover:text-blue-600 transition-colors flex items-center">
-            <i data-lucide="flame" class="w-4 h-4 mr-2"></i> LPG Monitoring
-        </a>
+        <a href="lpg.html" class="font-semibold text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100 hover:text-blue-600 transition-colors flex items-center"><i data-lucide="flame" class="w-4 h-4 mr-2"></i> LPG Monitoring</a>
       </div>
 
       <!-- Mobile menu button -->
-      <div class="lg:hidden">
-        <button id="menu-btn" class="focus:outline-none p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100">
-          <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
-      </div>
+      <div class="lg:hidden"><button id="menu-btn" class="focus:outline-none p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100"><i data-lucide="menu" class="w-6 h-6"></i></button></div>
     </div>
   </div>
 
@@ -125,141 +114,73 @@
 
 <!-- Main Content -->
 <main class="p-4 sm:p-6 lg:p-8">
-  <div class="mx-auto">
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+  <div class="mx-auto space-y-8">
       
-      <!-- Header Section -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 border-b pb-6">
-        <!-- Title -->
-        <div class="flex items-center gap-3">
-            <div class="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                <i data-lucide="droplet"></i>
+    <!-- Header Section -->
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md border">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-100 text-blue-600 p-2 rounded-lg"><i data-lucide="droplet"></i></div>
+                <div>
+                    <h1 id="category-title" class="text-xl font-bold text-gray-800">KEROSENE</h1>
+                    <p class="text-sm text-gray-500">Consumption Monitoring</p>
+                </div>
             </div>
-            <div>
-                <h1 id="category-title" class="text-xl font-bold text-gray-800">KEROSENE</h1>
-                <p class="text-sm text-gray-500">Consumption Monitoring</p>
+            
+            <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-2">
+              <div class="relative w-full sm:w-auto">
+                <select id="plant-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+                  <option value="GGPC - Gunma Gohkin" selected>GGPC - Gunma Gohkin</option>
+                  <option value="CDPC - Creative Diecast">CDPC - Creative Diecast</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+              </div>
+              <div class="relative w-full sm:w-auto">
+                <select id="month-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+                  <option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+              </div>
+              <div class="relative w-full sm:w-auto">
+                <select id="year-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"></select>
+                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+              </div>
             </div>
         </div>
-        
-        <!-- Controls Section -->
-        <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-2">
-          <!-- Plant Select -->
-          <div class="relative w-full sm:w-auto">
-            <select id="plant-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
-              <option value="GGPC - Gunma Gohkin" selected>GGPC - Gunma Gohkin</option>
-              <option value="CDPC - Creative Diecast">CDPC - Creative Diecast</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
-              <i data-lucide="chevron-down" class="w-4 h-4"></i>
-            </div>
-          </div>
+    </div>
 
-          <!-- Month Select -->
-          <div class="relative w-full sm:w-auto">
-            <select id="month-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
-              <option value="01">January</option>
-              <option value="02">February</option>
-              <option value="03">March</option>
-              <option value="04">April</option>
-              <option value="05">May</option>
-              <option value="06">June</option>
-              <option value="07">July</option>
-              <option value="08">August</option>
-              <option value="09">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
-              <i data-lucide="chevron-down" class="w-4 h-4"></i>
-            </div>
-          </div>
-
-          <!-- Year Select -->
-          <div class="relative w-full sm:w-auto">
-            <select id="year-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
-              <!-- dynamically populated -->
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
-              <i data-lucide="chevron-down" class="w-4 h-4"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Table -->
-      <div class="mb-8">
-        <div class="table-container custom-scroll">
-          <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
-            <table id="kerosene-table" class="min-w-full text-sm text-center border-collapse">
-                <thead class="bg-gray-100">
-                    <tr class="bg-gradient-to-r from-blue-50 to-blue-100">
-                        <th class="border-b p-3 text-center font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                        <th class="border-b p-3 text-center font-semibold text-gray-600 uppercase tracking-wider">Stock (L)</th>
-                        <th class="border-b p-3 text-center font-semibold text-gray-600 uppercase tracking-wider">Shift/Use (L)</th>
-                        <th class="border-b p-3 text-center font-semibold text-gray-600 uppercase tracking-wider">Press M#</th>
-                        <th class="border-b p-3 text-center font-semibold text-gray-600 uppercase tracking-wider">Remarks</th>
-                    </tr>
+    <!-- Main Table -->
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md border">
+        <h2 class="text-lg font-bold text-gray-700 mb-4">Daily Data Log</h2>
+        <div class="table-container custom-scroll overflow-x-auto rounded-lg border border-gray-200">
+            <table id="kerosene-table" class="min-w-full text-sm border-collapse whitespace-nowrap">
+                <thead class="bg-gray-100 text-xs uppercase font-semibold text-gray-600">
+                    <!-- Header populated by JS -->
                 </thead>
                 <tbody class="bg-white">
-                    <!-- Data will be populated by JS -->
+                    <!-- Data populated by JS -->
                 </tbody>
             </table>
-          </div>
         </div>
-      </div>
-
-      <!-- Chart Section -->
-      <div class="mt-8">
-        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 class="text-xl font-bold mb-4 text-gray-800">Kerosene Usage Analysis</h2>
-          
-          <div class="chart-container">
-            <canvas id="oilChart"></canvas>
-          </div>
-
-          <!-- Chart Summary -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 text-center">
-            <div class="bg-blue-50 p-4 rounded-lg">
-              <div class="text-2xl font-bold text-blue-600" id="total-consumed">0.00</div>
-              <div class="text-sm text-gray-600">Total Used (L)</div>
-            </div>
-            <div class="bg-purple-50 p-4 rounded-lg">
-              <div class="text-2xl font-bold text-purple-600" id="avg-consumption">0.00</div>
-              <div class="text-sm text-gray-600">Avg Usage (L)</div>
-            </div>
-            <div class="bg-green-50 p-4 rounded-lg">
-              <div class="text-2xl font-bold text-green-600" id="current-stock-chart">0.00</div>
-              <div class="text-sm text-gray-600">Current Stock (L)</div>
-            </div>
-            <div class="bg-orange-50 p-4 rounded-lg">
-              <div class="text-2xl font-bold text-orange-600" id="days-with-data">0</div>
-              <div class="text-sm text-gray-600">Days with Data</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Chart & Stats Section -->
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md border">
+        <h2 class="text-lg font-bold text-gray-700 mb-4">Monthly Analysis</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-center">
+            <div class="bg-blue-50 p-4 rounded-lg"><div class="text-2xl font-bold text-blue-600" id="total-consumed">0.00</div><div class="text-sm text-gray-600">Total Used (L)</div></div>
+            <div class="bg-purple-50 p-4 rounded-lg"><div class="text-2xl font-bold text-purple-600" id="avg-consumption">0.00</div><div class="text-sm text-gray-600">Avg Daily Usage (L)</div></div>
+            <div class="bg-green-50 p-4 rounded-lg"><div class="text-2xl font-bold text-green-600" id="current-stock-chart">0.00</div><div class="text-sm text-gray-600">Current Stock (L)</div></div>
+            <div class="bg-orange-50 p-4 rounded-lg"><div class="text-2xl font-bold text-orange-600" id="days-with-data">0</div><div class="text-sm text-gray-600">Days with Data</div></div>
+        </div>
+        <div class="chart-container">
+            <canvas id="oilChart"></canvas>
+        </div>
+    </div>
+
   </div>
 </main>
 
-<!-- Footer -->
-<footer class="bg-white text-gray-700 py-6 mt-8 border-t border-gray-200">
-  <div class="mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left">
-    <div class="flex items-center gap-2">
-      <img src="images/GGPC logo.png" alt="Company Logo" class="h-8 w-auto">   
-      <p class="text-sm">
-        &copy; 2025 Daily Monitoring Dashboard
-      </p>
-    </div>
-    <p class="text-sm mt-2 sm:mt-0">
-      <span class="font-medium">Kerosene Monitoring</span>
-    </p>
-  </div>
-</footer>
-
-<script src="kerosene.js">
-</script>
+<script src="kerosene.js"></script>
 </body>
 </html>

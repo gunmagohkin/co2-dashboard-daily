@@ -2,158 +2,277 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LPG Monitoring (6AM)</title>
   <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LPG Monitoring Dashboard</title>
+  <link rel="icon" type="image/x-icon" href="https://placehold.co/32x32/3B82F6/FFFFFF?text=G">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 400px;
+      }
+    }
+    .rotate-180 { 
+        transform: rotate(180deg);
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-sans">
 
-<nav class="bg-white shadow">
-  <div class="max-w-full mx-auto px-4">
-    <div class="flex justify-between items-center h-14">
-
-      <div class="flex items-center space-x-3">
-        <a href="index.html">
-          <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 w-auto">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo and Title -->
+      <div class="flex items-center space-x-3 min-w-0">
+        <a href="#" class="flex-shrink-0">
+            <img src="images/GGPC logo.png" alt="Company Logo" class="h-8 sm:h-10 w-auto">
         </a>
-        <div class="text-lg font-bold">Daily Monitoring Dashboard</div>
+        <h1 class="text-sm sm:text-lg font-bold text-gray-800 truncate">Daily Monitoring Dashboard</h1>
       </div>
 
-      <div class="hidden lg:flex space-x-6">
+      <!-- Desktop Navigation -->
+      <div class="hidden lg:flex items-center space-x-1">
         <div class="relative group">
-          <a href="#" class="hover:text-blue-500 font-semibold flex items-center">
+          <button class="font-semibold text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100 hover:text-blue-600 flex items-center transition-colors">
             Oil Usage in Operation
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </a>
-          <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-            <div class="py-1">
-              <a href="tellus46.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 46</a>
-              <a href="tellus32.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Tellus 32</a>
-              <a href="ep220.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">EP-220</a>
-              <a href="PL-1000.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">PL-1000</a>
-              <a href="kerosene.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">Kerosene</a>
-            </div>
+            <i data-lucide="chevron-down" class="w-4 h-4 ml-2 group-hover:rotate-180 transition-transform"></i>
+          </button>
+          <div class="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 py-2 border border-gray-200">
+            <a href="tellus46.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 46
+            </a>
+            <a href="tellus32.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 32
+            </a>
+            <a href="ep220.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> EP-220
+            </a>
+            <a href="PL-1000.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> PL-1000
+            </a>
+            <a href="kerosene.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+              <i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Kerosene
+            </a>
           </div>
         </div>
-
-        <a href="lpg.html" class="hover:text-blue-500 font-semibold">LPG Monitoring</a>
+        <a href="lpg.html" class="font-semibold text-blue-600 px-4 py-2 rounded-md bg-blue-50 flex items-center">
+            <i data-lucide="flame" class="w-4 h-4 mr-2"></i> LPG Monitoring
+        </a>
       </div>
 
+      <!-- Mobile menu button -->
       <div class="lg:hidden">
-        <button id="menu-btn" class="focus:outline-none">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
+        <button id="menu-btn" class="focus:outline-none p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100">
+          <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4">
-    <div class="mb-2">
-      <button id="mobile-oil-toggle" class="block py-1 hover:text-blue-500 font-semibold w-full text-left flex items-center justify-between">
-        Oil Usage in Operation
-        <svg id="mobile-arrow" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      <div id="mobile-oil-submenu" class="hidden ml-4 mt-1">
-        <a href="tellus46.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 46</a>
-        <a href="tellus36.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Tellus 32</a>
-        <a href="index.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">EP-220</a>
-        <a href="PL-1000.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">PL-1000</a>
-        <a href="kerosene.html" class="block py-1 text-sm text-gray-600 hover:text-blue-500">Kerosene</a>
+  <!-- Mobile Navigation -->
+  <div id="mobile-menu" class="lg:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden bg-white">
+    <div class="px-4 sm:px-6 pb-4 pt-2 border-t">
+      <div class="mt-2">
+        <button id="mobile-oil-toggle" class="block py-2 font-semibold text-gray-600 w-full text-left flex items-center justify-between">
+          Oil Usage in Operation
+          <i id="mobile-arrow" data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300"></i>
+        </button>
+        <div id="mobile-oil-submenu" class="pl-4 mt-2 space-y-2 transition-all duration-300 ease-in-out max-h-0 overflow-hidden">
+          <a href="tellus46.html" class="block py-1 text-gray-500 hover:text-blue-600">Tellus 46</a>
+          <a href="tellus32.html" class="block py-1 text-gray-500 hover:text-blue-600">Tellus 32</a>
+          <a href="ep220.html" class="block py-1 text-gray-500 hover:text-blue-600">EP-220</a>
+          <a href="PL-1000.html" class="block py-1 text-gray-500 hover:text-blue-600">PL-1000</a>
+          <a href="kerosene.html" class="block py-1 text-gray-500 hover:text-blue-600">Kerosene</a>
+        </div>
       </div>
+      <a href="lpg.html" class="block py-2 mt-2 font-semibold text-blue-600">LPG Monitoring</a>
     </div>
-    <a href="lpg.html" class="block py-1 hover:text-blue-500">LPG Monitoring</a>
   </div>
 </nav>
 
-<div class="p-4">
-  <div class="max-w-full overflow-x-auto">
-    <div class="bg-white p-4 rounded shadow-md">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-       <div class="flex items-center gap-2 mb-4">
-          <h1 id="category-title" class="text-lg font-bold">LPG Monitoring</h1>
-          <h1 class="text-lg font-bold">- Daily</h1>
+<!-- Main Content -->
+<main class="p-4 sm:p-6 lg:p-8">
+  <div class="mx-auto">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+      
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 border-b pb-6">
+        <!-- Title -->
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+                <i data-lucide="flame"></i>
+            </div>
+            <div>
+                <h1 id="category-title" class="text-xl font-bold text-gray-800">LPG Monitoring</h1>
+                <p class="text-sm text-gray-500">Daily Gas Performance</p>
+            </div>
         </div>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-          <div class="flex gap-2">
-             <select id="plant-select" class="border rounded p-1">
+        
+        <!-- Controls Section -->
+        <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-2">
+          <!-- Plant Select -->
+          <div class="relative w-full sm:w-auto">
+            <select id="plant-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
               <option value="GGPC - Gunma Gohkin" selected>GGPC - Gunma Gohkin</option>
               <option value="CDPC - Creative Diecast">CDPC - Creative Diecast</option>
             </select>
-            <select id="month-select" class="border rounded p-1">
-              <option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+
+          <!-- Month Select -->
+          <div class="relative w-full sm:w-auto">
+            <select id="month-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
             </select>
-            <select id="year-select" class="border rounded p-1">
-              <option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+
+          <!-- Year Select -->
+          <div class="relative w-full sm:w-auto">
+            <select id="year-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+              <!-- dynamically populated -->
             </select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+          
+          <!-- View Toggle Button -->
+          <button id="timeframe-toggle-btn" class="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+            <i data-lucide="calendar-days" class="w-4 h-4"></i>
+            <span>Weekly View</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-lg p-4">
+                <p class="text-sm font-medium text-gray-600">Kg/Tank</p>
+                <p class="text-2xl font-bold text-gray-800">5290</p>
+            </div>
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg p-4">
+                <p class="text-sm font-medium text-gray-600">2 Tank Capacity</p>
+                <p class="text-2xl font-bold text-gray-800">10580</p>
+            </div>
+            <div class="bg-green-50 border-l-4 border-green-400 rounded-r-lg p-4">
+                <p class="text-sm font-medium text-gray-600">Capacity at 85%</p>
+                <p class="text-2xl font-bold text-gray-800">8993</p>
+            </div>
+        </div>
+
+      <!-- Daily Table Container -->
+      <div id="daily-table-container" class="mb-8">
+        <div class="table-container custom-scroll">
+          <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-400">
+            <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
+              <!-- Table content will be generated by JS -->
+            </table>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2">
-        <div>
-          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between"><span>Kg/Tank:</span><span>5290</span></div>
-          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between"><span>2 Tank Cap:</span><span>10580</span></div>
-          <div class="border border-gray-400 p-1 rounded bg-gray-50 mb-1 flex justify-between"><span>2 Tank Cap at 85%:</span><span>8993</span></div>
-        </div>
+      <!-- Weekly Summary Container -->
+      <div id="weekly-summary-container" class="mt-8" style="display: none;">
+        <!-- Weekly summary content will be populated by JavaScript -->
       </div>
 
-      <div class="flex justify-end my-4">
-        <button id="timeframe-toggle-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700">
-            Switch to Weekly View
-        </button>
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div class="bg-blue-50 p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-blue-600" id="total-consumed">0%</div>
+            <div class="text-sm text-gray-600">Total Consumed (%)</div>
+          </div>
+          <div class="bg-green-50 p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-green-600" id="avg-consumption">0%</div>
+            <div class="text-sm text-gray-600">Avg Daily Consumption (%)</div>
+          </div>
       </div>
 
-      <div id="daily-table-container" class="overflow-x-auto border border-gray-300 rounded">
-        <table id="daily-table" class="border-collapse text-center text-xs min-w-full">
-           </table>
-      </div>
-
-      <div id="weekly-summary-container" class="mt-8">
+      <!-- Chart Section -->
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <h2 class="text-xl font-bold mb-4 text-gray-800">Consumption vs. Active Machines</h2>
+          <div class="chart-container">
+            <canvas id="activityChart"></canvas>
+          </div>
         </div>
-      
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 text-center">
-        <div class="bg-blue-50 p-3 rounded border">
-          <div class="text-2xl font-bold text-blue-600" id="total-consumed"></div>
-          <div class="text-sm text-gray-600">Total Consumed (%)</div>
-        </div>
-        <div class="bg-green-50 p-3 rounded border">
-          <div class="text-2xl font-bold text-green-600" id="avg-consumption"></div>
-          <div class="text-sm text-gray-600">Avg Daily Consumption (%)</div>
-        </div>
-      </div>
-
-      <div class="mt-4">
-        <div class="bg-white p-6 rounded shadow-md border">
-          <h2 class="text-lg font-bold mb-4">Consumption vs. Active Machines</h2>
-          <div class="relative h-96"><canvas id="activityChart"></canvas></div>
-        </div>
-      </div>
-
-      <div class="mt-8">
-        <div class="bg-white p-6 rounded shadow-md border">
-          <h2 class="text-lg font-bold mb-4">Machine Utilization</h2>
-          <div class="relative h-96"><canvas id="utilizationChart"></canvas></div>
+         <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <h2 class="text-xl font-bold mb-4 text-gray-800">Machine Utilization</h2>
+          <div class="chart-container">
+            <canvas id="utilizationChart"></canvas>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
-</div>
-<footer class="bg-gray-50 text-gray-700 py-4 mt-8 border-t border-gray-200">
-  <div class="max-w-full mx-auto px-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-5 text-center sm:text-left">
-    <img src="images/GGPC logo.png" alt="Company Logo" class="h-10 sm:mt-0 mt-2 object-contain">
-    <p class="text-sm flex items-center">&copy; 2025 Daily Monitoring Dashboard — <span class="font-medium ml-1">LPG Monitoring</span></p>
+</main>
+
+<!-- Footer -->
+<footer class="bg-white text-gray-700 py-6 mt-8 border-t border-gray-200">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left">
+    <div class="flex items-center gap-2">
+      <img src="images/GGPC logo.png" alt="Company Logo" class="h-8 w-auto">   
+      <p class="text-sm">
+        &copy; 2025 Daily Monitoring Dashboard
+      </p>
+    </div>
+    <p class="text-sm mt-2 sm:mt-0">
+      <span class="font-medium">LPG Monitoring</span>
+    </p>
   </div>
 </footer>
-<script src="lpg.js"></script>
 
+<script src="lpg.js">
+
+</script>
 </body>
 </html>
+
+

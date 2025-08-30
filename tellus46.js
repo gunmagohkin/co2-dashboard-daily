@@ -1,336 +1,218 @@
-// Tellus-46 Hydraulic Oil Refill Dashboard with Chart Functionality
+document.addEventListener('DOMContentLoaded', async () => {
 
-let currentChart = null;
-let currentRefillData = [];
+    let currentChart = null;
+    let currentRefillData = [];
 
-// Fetch Tellus 46 refill data (all Hydraulic Oil, all months/years)
-async function fetchTellus46Data(month, year) {
-  const url = '/.netlify/functions/kintone-tellus46';
-  const response = await fetch(url);
-  if (!response.ok) {
-    console.error('Failed to fetch data');
-    return [];
-  }
-  const data = await response.json();
-  // console.log('Total rows fetched from backend:', (data.rows || []).length);
-
-  // Filter by selected month and year in frontend
-  const selectedMonthStr = String(month).padStart(2, '0');
-  return (data.rows || []).filter(row => {
-    const date = row.Date?.value;
-    return date && date.startsWith(`${year}-${selectedMonthStr}`);
-  });
-}
-
-// Render refill table
-function renderRefillTable(refillRows) {
-  const tbody = document.querySelector('#refill-table tbody');
-  tbody.innerHTML = '';
-  if (!refillRows.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="px-3 py-8 text-gray-500">No refill data found.</td></tr>`;
-    return;
-  }
-  refillRows.forEach(row => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="border px-3 py-2">${row.Date?.value || '-'}</td>
-      <td class="border px-3 py-2">${row.Time_Refill?.value || '-'}</td>
-      <td class="border px-3 py-2">${row.Refill_Qty?.value || '-'}</td>
-      <td class="border px-3 py-2">${row.Remaining_Qty?.value || '-'}</td>
-      <td class="border px-3 py-2">${row.Refill_by?.value || '-'}</td>
-      <td class="border px-3 py-2">${row.Machine_Refilled?.value || '-'}</td>
-      <td class="border px-3 py-2">${row.Remarks?.value || '-'}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-// Process data for chart
-function processDataForChart(refillRows) {
-  const processedData = refillRows.map(row => {
-    const date = row.Date?.value || '';
-    const refillQty = parseFloat(row.Refill_Qty?.value) || 0;
-    // Generate mock runtime data based on refill quantity (for demo purposes)
-    // In real implementation, this should come from actual runtime data
-    const mockRuntime = refillQty > 0 ? (refillQty * 2.5 + Math.random() * 5) : 0;
-    
-    return {
-      date: date,
-      refillQty: refillQty,
-      runtime: parseFloat(mockRuntime.toFixed(1)),
-      machine: row.Machine_Refilled?.value || 'Unknown'
-    };
-  }).filter(item => item.date).sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  return processedData;
-}
-
-// Create or update chart
-function createChart(data) {
-  const ctx = document.getElementById('oilChart').getContext('2d');
-  
-  // Destroy existing chart
-  if (currentChart) {
-    currentChart.destroy();
-  }
-
-  const chartType = document.getElementById('chart-type').value;
-  const showConsumption = document.getElementById('show-consumption').checked;
-  const showRuntime = document.getElementById('show-runtime').checked;
-
-  const labels = data.map(item => {
-    const date = new Date(item.date);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  });
-
-  const datasets = [];
-
-  if (showConsumption) {
-    datasets.push({
-      label: 'Oil Refilled (L)',
-      data: data.map(item => item.refillQty),
-      borderColor: 'rgb(59, 130, 246)',
-      backgroundColor: chartType === 'bar' ? 'rgba(59, 130, 246, 0.7)' : 'rgba(59, 130, 246, 0.1)',
-      borderWidth: 2,
-      fill: chartType === 'line',
-      tension: 0.4,
-      yAxisID: 'y'
-    });
-  }
-
-  if (showRuntime) {
-    datasets.push({
-      label: 'Machine Runtime (hrs)',
-      data: data.map(item => item.runtime),
-      borderColor: 'rgb(239, 68, 68)',
-      backgroundColor: chartType === 'bar' ? 'rgba(239, 68, 68, 0.7)' : 'rgba(239, 68, 68, 0.1)',
-      borderWidth: 2,
-      fill: chartType === 'line',
-      tension: 0.4,
-      yAxisID: 'y1'
-    });
-  }
-
-  const config = {
-    type: chartType,
-    data: {
-      labels: labels,
-      datasets: datasets
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false,
-      },
-      plugins: {
-        title: {
-          display: true,
-          text: 'Tellus-46 Oil Consumption & Machine Runtime Analysis',
-          font: {
-            size: 16,
-            weight: 'bold'
-          }
-        },
-        legend: {
-          display: true,
-          position: 'top',
-        },
-        tooltip: {
-          callbacks: {
-            afterLabel: function(context) {
-              const dataIndex = context.dataIndex;
-              const machine = data[dataIndex]?.machine;
-              return machine ? `Machine: ${machine}` : '';
+    // --- KINTONE FETCH FUNCTION ---
+    async function fetchTellus46Data(month, year) {
+        const url = '/.netlify/functions/kintone-tellus46';
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.error('Failed to fetch data');
+                return [];
             }
-          }
+            const data = await response.json();
+            const selectedMonthStr = String(month).padStart(2, '0');
+            return (data.rows || []).filter(row => {
+                const date = row.Date?.value;
+                return date && date.startsWith(`${year}-${selectedMonthStr}`);
+            });
+        } catch (error) {
+            console.error("Error fetching Tellus 46 data:", error);
+            return [];
         }
-      },
-      scales: {
-        x: {
-          display: true,
-          title: {
-            display: true,
-            text: 'Date'
-          },
-          grid: {
-            display: true,
-            color: 'rgba(0, 0, 0, 0.1)'
-          }
-        },
-        y: {
-          type: 'linear',
-          display: showConsumption,
-          position: 'left',
-          title: {
-            display: true,
-            text: 'Oil Refilled (Liters)',
-            color: 'rgb(59, 130, 246)'
-          },
-          grid: {
-            display: true,
-            color: 'rgba(59, 130, 246, 0.1)'
-          },
-          ticks: {
-            color: 'rgb(59, 130, 246)'
-          }
-        },
-        y1: {
-          type: 'linear',
-          display: showRuntime,
-          position: 'right',
-          title: {
-            display: true,
-            text: 'Runtime (Hours)',
-            color: 'rgb(239, 68, 68)'
-          },
-          grid: {
-            drawOnChartArea: false,
-          },
-          ticks: {
-            color: 'rgb(239, 68, 68)'
-          }
-        }
-      }
     }
-  };
+    
+    // --- TABLE RENDERER ---
+    function renderRefillTable(refillRows) {
+      const tbody = document.querySelector('#refill-table tbody');
+      tbody.innerHTML = '';
+      if (!refillRows.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-500">No refill data for this period.</td></tr>`;
+        return;
+      }
+      refillRows.forEach(row => {
+        const tr = tbody.insertRow();
+        tr.className = 'hover:bg-gray-50';
+        tr.innerHTML = `
+          <td class="border-b border-gray-200 p-3">${row.Date?.value || '-'}</td>
+          <td class="border-b border-gray-200 p-3">${row.Time_Refill?.value || '-'}</td>
+          <td class="border-b border-gray-200 p-3 font-semibold text-blue-600">${row.Refill_Qty?.value || '-'}</td>
+          <td class="border-b border-gray-200 p-3">${row.Remaining_Qty?.value || '-'}</td>
+          <td class="border-b border-gray-200 p-3">${row.Refill_by?.value || '-'}</td>
+          <td class="border-b border-gray-200 p-3">${row.Machine_Refilled?.value || '-'}</td>
+          <td class="border-b border-gray-200 p-3">${row.Remarks?.value || '-'}</td>
+        `;
+      });
+    }
 
-  currentChart = new Chart(ctx, config);
-}
+    // --- CHART DATA PROCESSING ---
+    function processDataForChart(refillRows) {
+        return refillRows.map(row => {
+            const refillQty = parseFloat(row.Refill_Qty?.value) || 0;
+            return {
+                date: row.Date?.value || '',
+                refillQty: refillQty,
+                runtime: refillQty > 0 ? (refillQty * 2.5 + Math.random() * 5) : 0, // Mock runtime
+                machine: row.Machine_Refilled?.value || 'Unknown'
+            };
+        }).filter(item => item.date).sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
 
-// Update chart summary statistics
-function updateChartSummary(data) {
-  const totalConsumed = data.reduce((sum, item) => sum + item.refillQty, 0);
-  const totalRuntime = data.reduce((sum, item) => sum + item.runtime, 0);
-  const avgConsumption = data.length > 0 ? totalConsumed / data.length : 0;
-  const efficiency = totalRuntime > 0 ? totalConsumed / totalRuntime : 0;
+    // --- CHART RENDERER ---
+    function createChart(data) {
+        const ctx = document.getElementById('oilChart').getContext('2d');
+        if (currentChart) currentChart.destroy();
+        
+        const labels = data.map(item => new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        const chartType = document.getElementById('chart-type').value || 'bar';
 
-  document.getElementById('total-consumed').textContent = totalConsumed.toFixed(2);
-  document.getElementById('total-runtime').textContent = totalRuntime.toFixed(2);
-  document.getElementById('avg-consumption').textContent = avgConsumption.toFixed(2);
-  document.getElementById('efficiency').textContent = efficiency.toFixed(2);
-}
+        const oilRefilledDataset = {
+            label: 'Oil Refilled (L)',
+            data: data.map(item => item.refillQty),
+            yAxisID: 'y',
+            order: 2,
+        };
+
+        const machineRuntimeDataset = {
+            label: 'Machine Runtime (hrs)',
+            data: data.map(item => item.runtime),
+            yAxisID: 'y1',
+            order: 1,
+        };
+
+        let baseType = 'bar';
+        if (chartType === 'line') {
+            baseType = 'line';
+            // Both are lines
+            oilRefilledDataset.type = 'line';
+            oilRefilledDataset.borderColor = 'rgba(59, 130, 246, 1)'; // Blue
+            oilRefilledDataset.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+            oilRefilledDataset.tension = 0.3;
+
+            machineRuntimeDataset.type = 'line';
+            machineRuntimeDataset.borderColor = 'rgba(239, 68, 68, 1)'; // Red
+            machineRuntimeDataset.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            machineRuntimeDataset.tension = 0.3;
+        } else { // 'bar' chart view
+            // Oil is bar, runtime is line
+            oilRefilledDataset.type = 'bar';
+            oilRefilledDataset.backgroundColor = 'rgba(59, 130, 246, 0.7)'; // Blue bar
+
+            machineRuntimeDataset.type = 'line';
+            machineRuntimeDataset.borderColor = 'rgba(239, 68, 68, 1)'; // Red line
+            machineRuntimeDataset.backgroundColor = 'rgba(239, 68, 68, 1)'; 
+            machineRuntimeDataset.tension = 0.3;
+        }
+
+        currentChart = new Chart(ctx, {
+            type: baseType,
+            data: {
+            labels: labels,
+            datasets: [oilRefilledDataset, machineRuntimeDataset]
+            },
+            options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                title: { display: false },
+                legend: { position: 'top' },
+                tooltip: {
+                callbacks: {
+                    afterLabel: context => `Machine: ${data[context.dataIndex]?.machine || 'N/A'}`
+                }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Date' } },
+                y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Oil Refilled (Liters)' } },
+                y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Runtime (Hours)' } }
+            }
+            }
+        });
+    }
 
 
+    // --- STATS RENDERER ---
+    function updateChartSummary(data) {
+      const totalConsumed = data.reduce((sum, item) => sum + item.refillQty, 0);
+      const totalRuntime = data.reduce((sum, item) => sum + item.runtime, 0);
+      const avgConsumption = data.length > 0 ? totalConsumed / data.length : 0;
+      const efficiency = totalRuntime > 0 ? totalConsumed / totalRuntime : 0;
 
-// Setup chart controls
-function setupChartControls() {
-  const chartTypeSelect = document.getElementById('chart-type');
-  const showConsumptionCheckbox = document.getElementById('show-consumption');
-  const showRuntimeCheckbox = document.getElementById('show-runtime');
+      document.getElementById('total-consumed').textContent = totalConsumed.toFixed(2);
+      document.getElementById('total-runtime').textContent = totalRuntime.toFixed(2);
+      document.getElementById('avg-consumption').textContent = avgConsumption.toFixed(2);
+      document.getElementById('efficiency').textContent = efficiency.toFixed(2);
+    }
 
-  [chartTypeSelect, showConsumptionCheckbox, showRuntimeCheckbox].forEach(control => {
-    control.addEventListener('change', () => {
-      if (currentRefillData.length > 0) {
+    // --- MAIN LOGIC ---
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+    const plantSelect = document.getElementById('plant-select');
+    const chartTypeSelect = document.getElementById('chart-type');
+
+    function setupControls() {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        yearSelect.innerHTML = '';
+        for (let y = currentYear + 1; y >= 2022; y--) { yearSelect.add(new Option(y, y)); }
+        yearSelect.value = currentYear.toString();
+        monthSelect.value = String(currentDate.getMonth() + 1).padStart(2, '0');
+    }
+
+    async function loadAndRenderData() {
+        const month = monthSelect.value;
+        const year = yearSelect.value;
+        
+        currentRefillData = await fetchTellus46Data(month, year);
+        renderRefillTable(currentRefillData);
         const processedData = processDataForChart(currentRefillData);
         createChart(processedData);
         updateChartSummary(processedData);
-      }
+    }
+    
+    [monthSelect, yearSelect, plantSelect].forEach(el => el?.addEventListener('change', loadAndRenderData));
+
+    chartTypeSelect.addEventListener('change', () => {
+        if(currentRefillData.length > 0) {
+            const processedData = processDataForChart(currentRefillData);
+            createChart(processedData);
+        }
     });
-  });
-}
 
-// Mobile menu functionality
-function setupMobileMenu() {
-  const menuBtn = document.getElementById('menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const oilToggle = document.getElementById('mobile-oil-toggle');
-  const oilSubmenu = document.getElementById('mobile-oil-submenu');
-  const mobileArrow = document.getElementById('mobile-arrow');
+    // Mobile Menu
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileOilToggle = document.getElementById('mobile-oil-toggle');
+    const mobileOilSubmenu = document.getElementById('mobile-oil-submenu');
+    const mobileArrow = document.getElementById('mobile-arrow');
 
-  if (menuBtn && mobileMenu) {
     menuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
+        const isClosed = mobileMenu.style.maxHeight === '' || mobileMenu.style.maxHeight === '0px';
+        mobileMenu.style.maxHeight = isClosed ? mobileMenu.scrollHeight + "px" : '0px';
     });
-  }
 
-  if (oilToggle && oilSubmenu && mobileArrow) {
-    oilToggle.addEventListener('click', () => {
-      oilSubmenu.classList.toggle('hidden');
-      mobileArrow.classList.toggle('rotate-180');
+    mobileOilToggle.addEventListener('click', () => {
+        mobileArrow.classList.toggle('rotate-180');
+        const isSubmenuClosed = mobileOilSubmenu.style.maxHeight === '' || mobileOilSubmenu.style.maxHeight === '0px';
+        mobileOilSubmenu.style.maxHeight = isSubmenuClosed ? mobileOilSubmenu.scrollHeight + "px" : '0px';
+        setTimeout(() => {
+            const isParentClosed = mobileMenu.style.maxHeight === '' || mobileMenu.style.maxHeight === '0px';
+            if (!isParentClosed) { mobileMenu.style.maxHeight = mobileMenu.scrollHeight + "px"; }
+        }, 300);
     });
-  }
-}
-
-// Main data loading and rendering function
-async function loadAndRenderData(month, year) {
-  const loadingIndicator = document.getElementById('loading-indicator');
-  
-  try {
-    if (loadingIndicator) {
-      loadingIndicator.classList.remove('hidden');
-    }
-
-    const refillRows = await fetchTellus46Data(month, year);
-    currentRefillData = refillRows;
-
-    // Render table
-    renderRefillTable(refillRows);
-
-    // Process data for chart and render
-    const processedData = processDataForChart(refillRows);
-    createChart(processedData);
-    updateChartSummary(processedData);
-
-  } catch (error) {
-    console.error('Error loading data:', error);
-    // Show error message in table
-    const tbody = document.querySelector('#refill-table tbody');
-    tbody.innerHTML = `<tr><td colspan="7" class="px-3 py-8 text-red-500">Error loading data. Please try again.</td></tr>`;
-  } finally {
-    if (loadingIndicator) {
-      loadingIndicator.classList.add('hidden');
-    }
-  }
-}
-
-// --- MAIN INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', async () => {
-  const monthSelect = document.getElementById('month-select');
-  const yearSelect = document.getElementById('year-select');
-  const currentDate = new Date();
-  const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
-  const currentYear = currentDate.getFullYear().toString();
-
-  // Auto-populate year-select with years from 2022 to current year + 1
-  if (yearSelect) {
-    yearSelect.innerHTML = '';
-    const startYear = 2022;
-    const endYear = currentDate.getFullYear() + 1;
-    for (let y = endYear; y >= startYear; y--) {
-      const option = document.createElement('option');
-      option.value = y.toString();
-      option.textContent = y.toString();
-      yearSelect.appendChild(option);
-    }
-    yearSelect.value = currentYear;
-  }
-
-  // Set month-select to current month
-  if (monthSelect) {
-    monthSelect.value = currentMonth;
-  }
-
-  const selectedMonth = monthSelect ? monthSelect.value : currentMonth;
-  const selectedYear = yearSelect ? yearSelect.value : currentYear;
-
-  // Setup controls
-  setupChartControls();
-  setupMobileMenu();
-
-  // Initial load
-  await loadAndRenderData(selectedMonth, selectedYear);
-
-  // Filter on change
-  if (monthSelect && yearSelect) {
-    monthSelect.addEventListener('change', async () => {
-      await loadAndRenderData(monthSelect.value, yearSelect.value);
+    
+    document.querySelectorAll("select").forEach(select => {
+        const iconWrapper = select.nextElementSibling;
+        if (iconWrapper) {
+            select.addEventListener("focus", () => iconWrapper.classList.add("rotate-180"));
+            select.addEventListener("blur", () => iconWrapper.classList.remove("rotate-180"));
+        }
     });
-    yearSelect.addEventListener('change', async () => {
-      await loadAndRenderData(monthSelect.value, yearSelect.value);
-    });
-  }
+
+    lucide.createIcons();
+    setupControls();
+    await loadAndRenderData();
 });
-
-//

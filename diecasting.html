@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
+  <title>Diecasting Consumptions Monitoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .chart-container { position: relative; height: 300px; width: 100%; }
+    @media (min-width: 768px) { .chart-container { height: 400px; } }
+    .rotate-180 { transform: rotate(180deg); }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <div class="flex items-center space-x-3 min-w-0">
+        <a href="#" class="flex-shrink-0">
+            <img src="images/GGPC logo.png" alt="Company Logo" class="h-8 sm:h-10 w-auto">
+        </a>
+        <h1 class="text-sm sm:text-lg font-bold text-gray-800 truncate">Daily Monitoring Dashboard</h1>
+      </div>
+
+      <div class="hidden lg:flex items-center space-x-1">
+        <div class="relative group">
+          <button class="font-semibold text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100 flex items-center transition-colors">
+            Oil Usage in Operation
+            <i data-lucide="chevron-down" class="w-4 h-4 ml-2 group-hover:rotate-180 transition-transform"></i>
+          </button>
+          <div class="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 py-2 border border-gray-200">
+            <a href="tellus46.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 46</a>
+            <a href="tellus32.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Tellus 32</a>
+            <a href="ep220.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> EP-220</a>
+            <a href="PL-1000.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> PL-1000</a>
+            <a href="kerosene.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="droplet" class="w-4 h-4 mr-3 text-gray-400"></i> Kerosene</a>
+          </div>
+        </div>
+        <a href="lpg.html" class="font-semibold text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100 hover:text-blue-600 transition-colors flex items-center"><i data-lucide="flame" class="w-4 h-4 mr-2"></i> LPG Monitoring</a>
+        <a href="diecasting.html" class="font-semibold text-blue-600 px-4 py-2 rounded-md bg-blue-50 transition-colors flex items-center"><i data-lucide="anvil" class="w-4 h-4 mr-2"></i> Diecasting Consumptions</a>
+      </div>
+
+      <div class="lg:hidden">
+        <button id="menu-btn" class="focus:outline-none p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100"><i data-lucide="menu" class="w-6 h-6"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="lg:hidden transition-all duration-300 ease-in-out max-h-0 overflow-hidden bg-white">
+    <div class="px-4 sm:px-6 pb-4 pt-2 border-t">
+      <button id="mobile-oil-toggle" class="block py-2 font-semibold text-gray-600 w-full text-left flex items-center justify-between">Oil Usage in Operation <i id="mobile-arrow" data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300"></i></button>
+      <div id="mobile-oil-submenu" class="pl-4 mt-2 space-y-2 transition-all duration-300 ease-in-out max-h-0 overflow-hidden">
+        <a href="tellus46.html" class="block py-1 text-gray-500 hover:text-blue-600">Tellus 46</a>
+        <a href="tellus32.html" class="block py-1 text-gray-500 hover:text-blue-600">Tellus 32</a>
+        <a href="ep220.html" class="block py-1 text-gray-500 hover:text-blue-600">EP-220</a>
+        <a href="PL-1000.html" class="block py-1 text-gray-500 hover:text-blue-600">PL-1000</a>
+        <a href="kerosene.html" class="block py-1 text-gray-500 hover:text-blue-600">Kerosene</a>
+      </div>
+      <a href="lpg.html" class="block py-2 mt-2 font-semibold text-gray-600">LPG Monitoring</a>
+      <a href="diecasting.html" class="block py-2 mt-2 font-semibold text-blue-600">Diecasting Consumptions</a>
+    </div>
+  </div>
+</nav>
+
+<main class="p-4 sm:p-6 lg:p-8">
+  <div class="mx-auto">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+      
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 border-b pb-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-100 text-blue-600 p-2 rounded-lg"><i data-lucide="filter"></i></div>
+            <div>
+                <h1 id="item-title" class="text-xl font-bold text-gray-800">Diecasting Consumptions</h1>
+                <p id="item-description" class="text-sm text-gray-500">Monitoring of various diecasting materials.</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-2">
+          <div class="relative w-full sm:w-auto">
+            <select id="item-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+              <option value="SW220">SW220</option>
+              <option value="GL63P">GL63P</option>
+              <option value="Die slick 240VX">Die slick 240VX</option>
+              <option value="Die-lube Antilot">Die-lube Antilot (mould wax)</option>
+              <option value="Flux powder">Flux powder</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+          </div>
+          <div class="relative w-full sm:w-auto">
+            <select id="plant-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+              <option value="GGPC - Gunma Gohkin" selected>GGPC - Gunma Gohkin</option>
+              <option value="CDPC - Creative Diecast">CDPC - Creative Diecast</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+          </div>
+          <div class="relative w-full sm:w-auto">
+            <select id="month-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"></select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+          </div>
+          <div class="relative w-full sm:w-auto">
+            <select id="year-select" class="w-full sm:w-auto appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"></select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 transition-transform duration-300"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+          </div>
+          <button id="timeframe-toggle-btn" class="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+            <i data-lucide="calendar-days" class="w-4 h-4"></i>
+            <span>Weekly View</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="daily-table-container" class="my-8">
+        <h3 class="text-lg font-semibold text-slate-800 mb-4">Daily Data Log</h3>
+        <div class="rounded-lg shadow-md border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto custom-scroll relative">
+            <table id="daily-table" class="min-w-full text-xs text-center border-collapse">
+              <thead class="sticky top-0 bg-slate-100 z-10"></thead>
+              <tbody class="bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="weekly-summary-container" class="my-8" style="display: none;"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+        <div class="flex flex-col gap-4">
+          <div id="unit-info-card" class="bg-white rounded-lg shadow-md p-3 flex items-center gap-3 border-l-4 border-blue-400 transition-all duration-300 hover:shadow-lg">
+            <div class="bg-blue-100 p-2 rounded-full"><i data-lucide="box" class="w-5 h-5 text-blue-600"></i></div>
+            <div>
+              <div class="text-xs text-gray-500 font-medium">UNIT</div>
+              <div id="unit-of-measure" class="text-xl text-gray-800 font-bold">-</div>
+            </div>
+          </div>
+          <div id="delivery-unit-info-card" class="bg-white rounded-lg shadow-md p-3 flex items-center gap-3 border-l-4 border-green-400 transition-all duration-300 hover:shadow-lg">
+            <div class="bg-green-100 p-2 rounded-full"><i data-lucide="package" class="w-5 h-5 text-green-600"></i></div>
+            <div>
+              <div class="text-xs text-gray-500 font-medium">DELIVERY UNIT</div>
+              <div id="delivery-unit" class="text-xl text-gray-800 font-bold">-</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-3 border-l-4 border-sky-400 transition-all duration-300 hover:shadow-lg flex flex-col">
+          <div class="flex items-center gap-3 mb-2">
+              <div class="bg-sky-100 p-2 rounded-full"><i data-lucide="activity" class="w-5 h-5 text-sky-600"></i></div>
+              <h2 class="font-bold text-base text-gray-700">Monthly Summary</h2>
+          </div>
+          <div class="space-y-1 mt-auto">
+            <p class="flex justify-between items-baseline"><span class="text-gray-600 text-xs">Average consumption / day</span><span class="font-bold text-gray-800 text-lg" id="avg-consumption-day">0</span></p>
+            <p class="flex justify-between items-baseline"><span class="text-gray-600 text-xs">Monthly consumption</span><span class="font-bold text-gray-800 text-lg" id="monthly-consumption">0</span></p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-3 border-l-4 border-purple-400 transition-all duration-300 hover:shadow-lg flex flex-col">
+          <div class="flex items-center gap-3 mb-2">
+              <div class="bg-purple-100 p-2 rounded-full"><i data-lucide="truck" class="w-5 h-5 text-purple-600"></i></div>
+              <h2 class="font-bold text-base text-gray-700">Delivery Dates</h2>
+          </div>
+          <div class="flex-grow pt-1"><p id="delivery-date" class="text-gray-700 text-sm leading-relaxed">-</p></div>
+        </div>
+      </div>
+
+      <div class="mt-8">
+        <div class="bg-slate-50 p-4 sm:p-6 rounded-lg shadow-md border border-slate-200">
+          <h2 id="chart-main-title" class="text-xl font-bold mb-4 text-slate-800">Consumption Analysis</h2>
+          <div id="chart-controls" class="bg-white p-3 rounded-lg border border-slate-200 flex flex-col sm:flex-row flex-wrap items-center gap-4 mb-6">
+            <div class="flex items-center gap-2">
+              <i data-lucide="eye" class="w-4 h-4 text-slate-500"></i>
+              <label for="chart-view" class="text-sm font-medium text-slate-600">View:</label>
+              <div class="relative">
+                <select id="chart-view" class="appearance-none border border-slate-300 rounded-md pl-3 pr-8 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"><option value="daily" selected>Daily Consumption</option><option value="machine">By Machine</option></select>
+                <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-500"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-slate-500"></i>
+              <label for="chart-type" class="text-sm font-medium text-slate-600">Chart Type:</label>
+              <div class="relative">
+                <select id="chart-type" class="appearance-none border border-slate-300 rounded-md pl-3 pr-8 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"><option value="line" selected>Line Chart</option><option value="bar">Bar Chart</option></select>
+                <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-500"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+              </div>
+            </div>
+            <div class="flex items-center sm:ml-auto border-t sm:border-t-0 sm:border-l border-slate-200 w-full sm:w-auto pt-3 sm:pt-0 sm:pl-4 mt-3 sm:mt-0">
+              <button id="toggle-machine-summary" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap w-full sm:w-auto flex items-center justify-center gap-2">
+                  <i data-lucide="table" class="w-4 h-4"></i><span>Show Machine Summary</span>
+              </button>
+            </div>
+          </div>
+          <div id="daily-chart-container" class="relative mb-8"><div class="chart-container"><canvas id="mainChart"></canvas></div></div>
+          <div id="machine-chart-container" class="relative mb-8" style="display: none;"><div class="chart-container"><canvas id="machineChart"></canvas></div></div>
+          <div id="machine-summary-table" style="display: none;" class="mb-8"></div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 text-left">
+            <div class="bg-white border border-slate-200 p-4 rounded-lg flex items-center gap-4">
+              <div class="bg-blue-100 p-3 rounded-full"><i data-lucide="droplets" class="w-6 h-6 text-blue-600"></i></div>
+              <div>
+                  <div id="total-consumed-label" class="text-sm text-slate-500">Total Consumed</div>
+                  <div class="text-2xl font-bold text-slate-800" id="total-consumed">0</div>
+              </div>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 rounded-lg flex items-center gap-4">
+              <div class="bg-purple-100 p-3 rounded-full"><i data-lucide="trending-up" class="w-6 h-6 text-purple-600"></i></div>
+              <div>
+                  <div id="efficiency-label" class="text-sm text-slate-500">Avg per Day</div>
+                  <div class="text-2xl font-bold text-slate-800" id="efficiency">0</div>
+              </div>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 rounded-lg flex items-center gap-4">
+              <div class="bg-yellow-100 p-3 rounded-full"><i data-lucide="truck" class="w-6 h-6 text-yellow-600"></i></div>
+              <div>
+                  <div id="total-deliveries-label" class="text-sm text-slate-500">Total Deliveries</div>
+                  <div class="text-2xl font-bold text-slate-800" id="total-deliveries">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-white text-gray-700 py-6 mt-8 border-t border-gray-200">
+  <div class="mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left">
+    <div class="flex items-center gap-2">
+      <img src="images/GGPC logo.png" alt="Company Logo" class="h-8 w-auto">   
+      <p class="text-sm">&copy; 2025 Daily Monitoring Dashboard</p>
+    </div>
+    <p class="text-sm mt-2 sm:mt-0"><span class="font-medium">Diecasting Consumptions</span></p>
+  </div>
+</footer>
+
+<script src="diecasting.js"></script>
+</body>
+</html>

@@ -223,22 +223,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     return Object.entries(weeklyData).map(([week, data]) => ({ week, ...data }));
   }
 
-  function renderWeeklySummaryTable(records, daysInMonth, selectedYear, selectedMonth, config) {
-    const container = document.getElementById('weekly-summary-container');
-    if (!container) return;
-    const weeklyAggregates = aggregateDataByWeek(records, daysInMonth, selectedYear, selectedMonth, config);
-    let tableHTML = `<h2 class="text-lg font-bold mb-4">Weekly Summary</h2><div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm custom-scroll"><table class="min-w-full text-sm text-left">
-      <thead class="bg-gray-50"><tr>
-        <th class="px-4 py-2 font-semibold">Week</th><th class="px-4 py-2 font-semibold">Total Consumed (L)</th><th class="px-4 py-2 font-semibold">Operating Days</th><th class="px-4 py-2 font-semibold">Avg. L/Day</th><th class="px-4 py-2 font-semibold">Deliveries</th><th class="px-4 py-2 font-semibold">Refills</th>
-      </tr></thead><tbody>`;
-    weeklyAggregates.forEach(w => {
-      const efficiency = w.machineOperatingDays > 0 ? w.totalConsumption / w.machineOperatingDays : 0;
-      tableHTML += `<tr class="border-t hover:bg-gray-50">
-        <td class="px-4 py-2 font-bold">Week ${w.week}</td><td class="px-4 py-2">${w.totalConsumption.toFixed(2)}</td><td class="px-4 py-2">${w.machineOperatingDays}</td><td class="px-4 py-2">${efficiency.toFixed(2)}</td><td class="px-4 py-2">${w.totalDelivery}</td><td class="px-4 py-2">${w.totalRefills}</td>
+  /**
+ * Renders the weekly summary table with an improved UI, matching the daily table style.
+ * Uses the 'config' object to dynamically display units.
+ */
+function renderWeeklySummaryTable(records, daysInMonth, selectedYear, selectedMonth, config) {
+  const container = document.getElementById('weekly-summary-container');
+  if (!container) return;
+
+  // Data aggregation remains the same
+  const weeklyAggregates = aggregateDataByWeek(records, daysInMonth, selectedYear, selectedMonth, config);
+
+  // Re-styled HTML generation
+  let tableHTML = `
+    <h3 class="text-lg font-semibold text-slate-800 mb-4">Weekly Summary</h3>
+    <div class="rounded-lg shadow-md border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto custom-scroll">
+        <table class="min-w-full text-sm text-left border-collapse">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-left border-b border-slate-200">Week</th>
+              <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-left border-b border-slate-200">Total Consumed (${config.unit || 'units'})</th>
+              <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-center border-b border-slate-200">Operating Days</th>
+              <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-left border-b border-slate-200">Avg. ${config.unit || 'units'}/Day</th>
+              <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-center border-b border-slate-200">Deliveries</th>
+              <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-center border-b border-slate-200">Refills</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+  weeklyAggregates.forEach(w => {
+    const efficiency = w.machineOperatingDays > 0 ? w.totalConsumption / w.machineOperatingDays : 0;
+    tableHTML += `
+      <tr class="odd:bg-white even:bg-slate-50 hover:bg-sky-100 transition-colors duration-200">
+        <td class="px-4 py-2 border-b border-slate-200 font-medium text-slate-900">Week ${w.week}</td>
+        <td class="px-4 py-2 border-b border-slate-200 text-slate-700">${w.totalConsumption.toFixed(2)}</td>
+        <td class="px-4 py-2 border-b border-slate-200 text-slate-700 text-center">${w.machineOperatingDays}</td>
+        <td class="px-4 py-2 border-b border-slate-200 text-slate-700">${efficiency.toFixed(2)}</td>
+        <td class="px-4 py-2 border-b border-slate-200 text-slate-700 text-center">${w.totalDelivery}</td>
+        <td class="px-4 py-2 border-b border-slate-200 text-slate-700 text-center">${w.totalRefills}</td>
       </tr>`;
-    });
-    container.innerHTML = tableHTML + `</tbody></table></div>`;
-  }
+  });
+
+  tableHTML += `
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+    
+  container.innerHTML = tableHTML;
+}
 
   // MACHINE CONSUMPTION
   function groupConsumptionByMachine(records, config) {

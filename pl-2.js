@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', async () => {
     // --- MOCK DATA FUNCTION (FOR DEMO) ---
     const fetchMockData = (month, year) => {
@@ -65,7 +64,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: 'PL-1000 Oil Consumption'
       },
       deliveryKey: 'Delivery_PL',
-      machineKey: 'Machine_ID'
+      machineKey: 'Machine_ID',
+      unit: 'Liters' // Added to support new weekly table function
     }
   };
 
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
     for (let day = 1; day <= daysInMonth; day++) {
       const th = document.createElement('th');
-      th.className = 'border-b border-gray-200 px-2 py-2 font-semibold text-gray-600 text-xs whitespace-nowrap';
+      th.className = 'px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider border-b border-slate-200';
       th.textContent = day.toString();
       headerRow.appendChild(th);
     }
@@ -115,7 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!row) return;
       for (let day = 1; day <= daysInMonth; day++) {
         const td = document.createElement('td');
-        td.className = row.children[0].className.replace('font-semibold text-gray-800 text-left', 'text-center');
+        td.className = 'px-4 py-2 border-b border-slate-200 text-slate-700 text-center';
+         // Special handling for last row border
+        if (rowIdx === config.table.length - 1) {
+            td.classList.remove('border-b');
+        }
         const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const rec = records.find(r => r['Date_Today']?.value === dateStr);
         td.textContent = rec?.[item.key]?.value || '-';
@@ -221,21 +225,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     return Object.entries(weeklyData).map(([week, data]) => ({ week, ...data }));
   }
 
+  // UPDATED WEEKLY SUMMARY TABLE FUNCTION
   function renderWeeklySummaryTable(records, daysInMonth, selectedYear, selectedMonth, config) {
     const container = document.getElementById('weekly-summary-container');
     if (!container) return;
+
     const weeklyAggregates = aggregateDataByWeek(records, daysInMonth, selectedYear, selectedMonth, config);
-    let tableHTML = `<h2 class="text-lg font-bold mb-4">Weekly Summary</h2><div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm custom-scroll"><table class="min-w-full text-sm text-left">
-      <thead class="bg-gray-50"><tr>
-        <th class="px-4 py-2 font-semibold">Week</th><th class="px-4 py-2 font-semibold">Total Consumed (L)</th><th class="px-4 py-2 font-semibold">Operating Days</th><th class="px-4 py-2 font-semibold">Avg. L/Day</th><th class="px-4 py-2 font-semibold">Deliveries</th><th class="px-4 py-2 font-semibold">Refills</th>
-      </tr></thead><tbody>`;
+
+    let tableHTML = `
+      <h3 class="text-lg font-semibold text-slate-800 mb-4">Weekly Summary</h3>
+      <div class="rounded-lg shadow-md border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto custom-scroll">
+          <table class="min-w-full text-sm text-left border-collapse">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-left border-b border-slate-200">Week</th>
+                <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-left border-b border-slate-200">Total Consumed (${config.unit || 'units'})</th>
+                <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-center border-b border-slate-200">Operating Days</th>
+                <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-left border-b border-slate-200">Avg. ${config.unit || 'units'}/Day</th>
+                <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-center border-b border-slate-200">Deliveries</th>
+                <th class="px-4 py-3 font-semibold text-slate-600 text-[11px] uppercase tracking-wider text-center border-b border-slate-200">Refills</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
     weeklyAggregates.forEach(w => {
       const efficiency = w.machineOperatingDays > 0 ? w.totalConsumption / w.machineOperatingDays : 0;
-      tableHTML += `<tr class="border-t hover:bg-gray-50">
-        <td class="px-4 py-2 font-bold">Week ${w.week}</td><td class="px-4 py-2">${w.totalConsumption.toFixed(2)}</td><td class="px-4 py-2">${w.machineOperatingDays}</td><td class="px-4 py-2">${efficiency.toFixed(2)}</td><td class="px-4 py-2">${w.totalDelivery}</td><td class="px-4 py-2">${w.totalRefills}</td>
-      </tr>`;
+      tableHTML += `
+        <tr class="odd:bg-white even:bg-slate-50 hover:bg-sky-100 transition-colors duration-200">
+          <td class="px-4 py-2 border-b border-slate-200 font-medium text-slate-900">Week ${w.week}</td>
+          <td class="px-4 py-2 border-b border-slate-200 text-slate-700">${w.totalConsumption.toFixed(2)}</td>
+          <td class="px-4 py-2 border-b border-slate-200 text-slate-700 text-center">${w.machineOperatingDays}</td>
+          <td class="px-4 py-2 border-b border-slate-200 text-slate-700">${efficiency.toFixed(2)}</td>
+          <td class="px-4 py-2 border-b border-slate-200 text-slate-700 text-center">${w.totalDelivery}</td>
+          <td class="px-4 py-2 border-b border-slate-200 text-slate-700 text-center">${w.totalRefills}</td>
+        </tr>`;
     });
-    container.innerHTML = tableHTML + `</tbody></table></div>`;
+
+    tableHTML += `
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+      
+    container.innerHTML = tableHTML;
   }
 
   // MACHINE CONSUMPTION
@@ -369,18 +402,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateData();
   });
 
+  // UPDATED EVENT LISTENER
   const summaryToggleBtn = document.getElementById('toggle-machine-summary');
   summaryToggleBtn.addEventListener('click', () => {
     const summaryTable = document.getElementById('machine-summary-table');
     const isHidden = summaryTable.style.display === 'none';
     summaryTable.style.display = isHidden ? 'block' : 'none';
-    summaryToggleBtn.textContent = isHidden ? 'Hide Machine Summary' : 'Show Machine Summary';
     
-    // Correctly toggle between blue (active) and gray (inactive) states
-    summaryToggleBtn.classList.toggle('bg-gray-500', isHidden);
-    summaryToggleBtn.classList.toggle('hover:bg-gray-600', isHidden);
-    summaryToggleBtn.classList.toggle('bg-blue-500', !isHidden);
-    summaryToggleBtn.classList.toggle('hover:bg-blue-600', !isHidden);
+    const btnSpan = summaryToggleBtn.querySelector('span');
+    if (btnSpan) {
+        btnSpan.textContent = isHidden ? 'Hide Machine Summary' : 'Show Machine Summary';
+    } else { // Fallback if span is not found
+        summaryToggleBtn.textContent = isHidden ? 'Hide Machine Summary' : 'Show Machine Summary';
+    }
   });
 
   // Mobile Menu
@@ -399,7 +433,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     mobileArrow.classList.toggle('rotate-180');
     const isSubmenuClosed = mobileOilSubmenu.style.maxHeight === '' || mobileOilSubmenu.style.maxHeight === '0px';
     mobileOilSubmenu.style.maxHeight = isSubmenuClosed ? mobileOilSubmenu.scrollHeight + "px" : '0px';
-    // Adjust parent menu height
     setTimeout(() => {
         const isParentClosed = mobileMenu.style.maxHeight === '' || mobileMenu.style.maxHeight === '0px';
         if (!isParentClosed) {

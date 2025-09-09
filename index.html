@@ -6,15 +6,12 @@
     <link rel="shortcut icon" href="images/gkg.ico" type="image/x-icon">
     <title>GGPC Dashboard | Log in</title>
     
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Custom Tailwind Configuration -->
     <script>
       tailwind.config = {
         theme: {
@@ -69,21 +66,18 @@
     <div class="min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-2xl bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 md:p-12 relative">
             
-            <!-- Logo Area -->
             <div class="flex justify-center items-center mb-6">
                 <div class="w-56">
                      <img src="images/GGPC logo.png" alt="GGPC Logo" onerror="this.style.display='none'">
                 </div>
             </div>
 
-            <!-- Header Text -->
             <div class="text-center mb-8">
                 <h1 id="welcome-text" class="text-4xl font-bold text-gray-800 mb-3 h-12"></h1>
                 <p class="text-gray-500">Sign in to access your dashboard.</p>
             </div>
 
             <form novalidate>
-                <!-- User Dropdown -->
                 <div class="relative mb-6">
                     <label for="user-dropdown-button" class="block text-sm font-medium text-gray-600 mb-2">User</label>
                     <input type="hidden" id="selected-user" name="username">
@@ -98,12 +92,10 @@
 
                     <div id="user-dropdown-menu" class="dropdown-menu absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 opacity-0 transform -translate-y-2 scale-95 pointer-events-none">
                         <ul class="py-1">
-                            <!-- User options will be dynamically inserted here by JS -->
-                        </ul>
+                            </ul>
                     </div>
                 </div>
 
-                <!-- Password Field -->
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium text-gray-600 mb-2">Password</label>
                     <div class="relative">
@@ -118,12 +110,10 @@
                     </div>
                 </div>
 
-                <!-- Error Message Area -->
                 <div id="error-message" class="hidden text-red-500 text-sm mb-4 text-center font-medium">
                     Invalid user or password. Please try again.
                 </div>
 
-                <!-- Login Button -->
                 <div>
                     <button type="submit" id="login-button" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
                         Log In
@@ -131,14 +121,12 @@
                 </div>
             </form>
 
-            <!-- Loading Overlay -->
             <div id="loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center hidden">
                 <img src="images/GGPC logo.png" alt="Loading..." class="w-32 animate-bounce" onerror="this.style.display='none'">
             </div>
         </div>
     </div>
 
-    <!-- Vanilla JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
              // --- Canvas Line Animation ---
@@ -373,18 +361,21 @@
 
                     const result = await response.json();
 
-                    if (result.success) {
-                        // On success, wait 2.5 seconds then redirect
+                    if (result.success && result.token) {
+                        // On success, save the token and then redirect
                         setTimeout(() => {
+                            localStorage.setItem('jwtToken', result.token);
                             window.location.href = 'ep220.html';
                         }, 2500);
                     } else {
                         // On failure, show error and reset the form
-                        errorMessage.classList.remove('hidden');
-                        errorTimeout = setTimeout(() => {
-                            errorMessage.classList.add('hidden');
-                        }, 3000);
-                        resetFormState();
+                        setTimeout(() => {
+                           errorMessage.classList.remove('hidden');
+                            errorTimeout = setTimeout(() => {
+                                errorMessage.classList.add('hidden');
+                            }, 3000);
+                            resetFormState();
+                        }, 1000); // Add a small delay to prevent jarring UI shift
                     }
                 } catch (error) {
                     // Handle network or server errors

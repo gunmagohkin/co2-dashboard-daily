@@ -1,3 +1,7 @@
+// netlify/functions/login.js
+
+const jwt = require('jsonwebtoken'); // Import the JWT library
+
 // A map of user IDs to their corresponding environment variable keys.
 const userPasswordKeys = {
   ivan_golosinda: 'USER_PASS_IVAN',
@@ -20,10 +24,17 @@ exports.handler = async function (event, context) {
 
     // Check if the user exists and the password is correct.
     if (correctPassword && correctPassword === password) {
-      // SUCCESS: Send back a success message.
+      // ✅ SUCCESS: Create a JWT.
+      const token = jwt.sign(
+        { userId: userId },      // Payload: Data inside the token
+        process.env.JWT_SECRET,  // 🔑 Secret: Your secret key from .env
+        { expiresIn: '8h' }      // Options: Token expires in 8 hours
+      );
+
+      // Return a success response including the new token
       return {
         statusCode: 200,
-        body: JSON.stringify({ success: true }),
+        body: JSON.stringify({ success: true, token: token }),
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       };
     } else {
@@ -35,6 +46,7 @@ exports.handler = async function (event, context) {
       };
     }
   } catch (error) {
+    console.error("Login Error:", error); // Log the error for debugging
     return {
       statusCode: 500,
       body: JSON.stringify({ success: false, message: 'Internal server error' }),

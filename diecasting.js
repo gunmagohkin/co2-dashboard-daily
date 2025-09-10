@@ -48,24 +48,69 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const CONFIG_MAP = {
         'SW220': {
-            description: "Hydraulic Oil", unit: "Liters", deliveryUnit: "Pail",
-            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', refill: 'Refill' }
+            description: "Hydraulic Oil",
+            unit: "Liters",
+            deliveryUnit: "Drum",
+            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', estimate: 'Estimate' },
+            tableMetrics: [
+                { label: 'Consumed Liters', key: 'consumed' },
+                { label: 'Stock Liters', key: 'remaining' },
+                { label: 'Estimate in Liters', key: 'estimate' },
+                { label: 'Machine Run', key: 'machine' },
+                { label: 'Delivery Liters/Drum', key: 'delivery' }
+            ]
         },
         'GL63P': {
-            description: "Grease", unit: "Kg", deliveryUnit: "Pail",
-            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', refill: 'Refill' }
+            description: "Grease",
+            unit: "Liters",
+            deliveryUnit: "Drum",
+            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', estimate: 'Estimate' },
+            tableMetrics: [
+                { label: 'Consumed Liters', key: 'consumed' },
+                { label: 'Stock Liters', key: 'remaining' },
+                { label: 'Estimate in Liters', key: 'estimate' },
+                { label: 'Machine Run', key: 'machine' },
+                { label: 'Delivery Liters/Drum', key: 'delivery' }
+            ]
         },
         'Die slick 240VX': {
-            description: "Die Lubricant", unit: "Liters", deliveryUnit: "Pail",
-            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', refill: 'Refill' }
+            description: "Die Lubricant",
+            unit: "Liters",
+            deliveryUnit: "Pail",
+            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', refill: 'Refill' },
+            tableMetrics: [ // Unchanged item, converted to new format for consistency
+                { label: 'Consumed Liters', key: 'consumed' },
+                { label: 'Stock Liters', key: 'remaining' },
+                { label: 'Estimate in Liters', key: 'estimate' },
+                { label: 'Machine Run', key: 'machine' },
+                { label: 'Delivery Liters/Drum', key: 'delivery' }
+            ]
         },
         'Die-lube Antilot': {
-            description: "Mould Wax", unit: "Pcs", deliveryUnit: "Box",
-            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', refill: 'Refill' }
+            description: "Mould Wax",
+            unit: "Can",
+            deliveryUnit: "Can",
+            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', estimate: 'Estimate' },
+            tableMetrics: [
+                { label: 'Consumed Can', key: 'consumed' },
+                { label: 'Stock Can', key: 'remaining' },
+                { label: 'Estimate in Can', key: 'estimate' },
+                { label: 'Machine Run', key: 'machine' },
+                { label: 'Delivery Can', key: 'delivery' }
+            ]
         },
         'Flux powder': {
-            description: "Purifying Agent", unit: "Kg", deliveryUnit: "Bag",
-            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', refill: 'Refill' }
+            description: "Purifying Agent",
+            unit: "kg",
+            deliveryUnit: "kg",
+            tableKeys: { consumed: 'Total_Consumed', machine: 'Machine_Run', remaining: 'Remaining_Stock', delivery: 'Delivery', estimate: 'Estimate' },
+            tableMetrics: [
+                { label: 'Consumed kg', key: 'consumed' },
+                { label: 'Stock kg', key: 'remaining' },
+                { label: 'Estimate kg', key: 'estimate' },
+                { label: 'Machine Run', key: 'machine' },
+                { label: 'Delivery kg', key: 'delivery' }
+            ]
         }
     };
 
@@ -88,16 +133,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         headerHTML += '</tr>';
         table.querySelector('thead').innerHTML = headerHTML;
 
-        const tableMetrics = [
-            { label: `Total Consumed (${config.unit})`, key: config.tableKeys.consumed },
-            { label: 'Machine Run', key: config.tableKeys.machine },
-            { label: `Remaining Stock (${config.unit})`, key: config.tableKeys.remaining },
-            { label: `Delivery (${config.deliveryUnit})`, key: config.tableKeys.delivery },
-            { label: `Refill (${config.deliveryUnit})`, key: config.tableKeys.refill },
-        ];
+        const tableMetrics = config.tableMetrics || [];
         
         let bodyHTML = '';
         tableMetrics.forEach((item, index) => {
+            const dataKey = config.tableKeys[item.key];
             const isLastRow = index === tableMetrics.length - 1;
             const borderClass = isLastRow ? 'border-b-0' : 'border-b';
             
@@ -106,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (let day = 1; day <= days; day++) {
                 const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const rec = records.find(r => r['Date_Today']?.value === dateStr);
-                bodyHTML += `<td class="px-4 py-2 ${borderClass} border-slate-200 text-slate-700 text-center">${rec?.[item.key]?.value || '-'}</td>`;
+                bodyHTML += `<td class="px-4 py-2 ${borderClass} border-slate-200 text-slate-700 text-center">${rec?.[dataKey]?.value || '-'}</td>`;
             }
             bodyHTML += '</tr>';
         });
